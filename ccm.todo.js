@@ -3,11 +3,11 @@
 ccm.files['ccm.todo.js'] = {
     name: 'todo',
     ccm: '././libs/ccm/ccm.js',
-    config: {
+    config: {   //NOTE this. ...
         data: {
             store: ['ccm.store', {
                 local: {
-                    notes: {                                //NOTE this lvl is this.data.key
+                    notes: {
                         key: 'notes',
                         title: 'Notizensammlung',
                         items: [
