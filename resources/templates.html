@@ -5,22 +5,60 @@
 <ccm-template key="header">
     <header>
         <div>
-            <h1> To-Do Manager</h1>
-            <p> Hallo %userId%<p>
+            <h1>To-Do Manager</h1>
+            <p>Hallo, %userId%!<p>
         </div>
-        <div id="container">
+        <nav>
             <div>Punkte</div>
-            <div>Shop</div>
+            <button class="primary">Shop & Statistiken</button>
             <div>Logout</div>
-        </div>
-
+        </nav>
     </header>
 </ccm-template>
 
-<ccm-template key="cat">
-<div id="categories">cat Main</div>
+<ccm-template key="catArea">
+<div id="categories" class="div-outline" >Kategorien</div>
 </ccm-template>
 
-<ccm-template key="task">
-<div id="tasks">task main</div>
+<ccm-template key="taskArea">
+    <div id="tasks" class="div-outline">
+        <div id="taskHeader">
+            <p>Meine Aufgaben</p>
+            <button id="newTaskButton" class="primary"> + Neue Aufgabe</button>
+        </div>
+
+        <div id="newTaskBox" class="hidden">
+            <div>
+                <label>
+                    <span> Inhalt * </span>
+                    <input type="text" id="taskContent" placeholder="Was möchten Sie erledigen?"/>
+                </label>
+            </div>
+
+            <div id="newTaskInputs">
+                <label id="dateLabel">
+                    <span> Frist (optional) </span>
+                    <input type="date" id="taskDeadline"/>
+                </label>
+
+                <label id="pointsLabel">
+                    <span> Punkte (optional) </span>
+                    <input type="number" id="taskpoints" placeholder="10"/>
+                </label>
+            </div>
+
+            <div id="newTaskButtons">
+                <button id="createTask" class="primary">
+                    Erstellen
+                </button>
+                <button id="cancelTask" class="secondary">
+                    Abbrechen
+                </button>
+            </div>
+        </div>
+        <div id="noTaskInfo">
+            <span>Keine offenen Aufgaben</span>
+            <span>Erstellen Sie eine neue Aufgabe, um loszulegen</span>
+        </div>
+    </div>
 </ccm-template>

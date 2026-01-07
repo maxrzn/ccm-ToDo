@@ -1,11 +1,18 @@
+#element {
+    --blue: #2b7efd;
+    --blue_hover: #2b6efd;
+}
+
 header {
     display: flex;
     align-items: center;
     justify-content: space-between;
 
-    #container {
+    & nav {
         display: flex;
         justify-content: space-between;
+        align-items: center;
+        gap: 10px;
     }
 }
 #main {
@@ -15,21 +22,116 @@ header {
     column-gap: 10px;
     background-color: #efefef;
 
-    & div {
+    .div-outline{
         border : 1px solid lightgray;
         border-radius: 12px;
         padding: 4px;
         background-color: white;
-
     }
     #categories {
         flex-basis: 40%;
+        align-items: center;
     }
     #tasks {
+        display: flex;
+        flex-direction: column;
         flex-basis: 60%;
+        gap: 10px;
+    }
+    #taskHeader {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+    }
+    #newTaskBox.hidden{
+        display:none;
+    }
+    #newTaskBox {
+        display: flex;
+        flex-direction: column;
+        gap:10px;
+
+        border: 2px solid lightskyblue;
+        border-radius: 12px;
+        padding: 10px;
+
+        & #newTaskInputs {
+            display: flex;
+            flex-grow:1;
+            gap: 4px;
+
+            & #dateLabel {
+                flex-basis: 50%;
+            }
+            & #pointsLabel {
+                flex-basis: 50%;
+            }
+
+        }
+
+        & #newTaskButtons {
+            display:flex;
+            gap: 10px;
+
+            & #createTask {
+                flex-basis: 80%;
+            }
+            & #cancelTask {
+                flex-basis: 20%;
+            }
+        }
+    }
+    & #noTaskInfo{
+        display:flex;
+        flex-direction: column;
+        align-items: center;
+        gap:10px;
+        padding:10%;
+        color: #959595;
     }
 }
-
+label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+input{
+    border: 1px solid lightgray;
+    border-radius: 12px;
+    padding: 12px;
+}
+input:focus {
+    outline: 2px solid var(--blue);
+    box-shadow: 0 0 8px var(--blue);
+}
+.primary {
+    background-color: var(--blue);
+    border: 0;
+    border-radius: 12px;
+    color: white;
+    padding: 10px;
+}
+.secondary {
+    background-color: lightgray;
+    border: 0;
+    border-radius: 12px;
+    color: black;
+    padding: 10px;
+}
+.primary:hover {
+     background-color: var(--blue_hover);
+ }
+.secondary:hover {
+    background-color: #b8b8b8;
+}
+.column {
+    display:flex;
+    flex-direction: column;
+}
+.center {
+    align-items: center;
+}
 h1,h3,p {
     margin : 0;
 }
