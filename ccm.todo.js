@@ -19,9 +19,7 @@ ccm.files['ccm.todo.js'] = {
 
     Instance: function () {
         const userId = "testuser";
-        /*this.ready = async() => {
-            console.log('Dependencies loaded:', this.html);
-        }*/
+
         this.start = async()=> {
             const userCats = await this.cat.get({ownerId: userId}); //check for existing categories
             if(!userCats.length) {
@@ -32,7 +30,6 @@ ccm.files['ccm.todo.js'] = {
                 });
             }
             const cats = await this.cat.get();
-           /* await this.cat.del("default");*/
             cats.forEach((element) => {
                 console.log(element);
             });
@@ -45,33 +42,48 @@ ccm.files['ccm.todo.js'] = {
                 categoryId: "default",
                 userId: userId
             })*/
+
             const main = this.ccm.helper.html(this.html.main);
 
             this.element.innerHTML = "";
             this.element.appendChild((this.ccm.helper.html(this.html.header, {userId: userId})));
             this.element.appendChild(main);
 
-            main.appendChild(this.ccm.helper.html(this.html.cat));
-            main.appendChild(this.ccm.helper.html(this.html.task));
+            main.appendChild(this.ccm.helper.html(this.html.catArea));
+            main.appendChild(this.ccm.helper.html(this.html.taskArea));
 
-            /*const data = await this.data.cat.get(this.data.key);   //NOTE get sucht nach value von key also 'notes' innerhalb von data
-            console.log(data, 'items', data.items, 'key', data.key);
-            this.element.innerHTML = '';
-            this.element.appendChild(this.ccm.helper.html(this.html.main, {test: data.key}));*/
+            //open new Task creation
+            const newTaskButton = this.element.querySelector("#newTaskButton");
+            const newTaskBox = this.element.querySelector('#newTaskBox');
+            newTaskButton.addEventListener("click", () => {
+                newTaskButton.disabled = true;
+                newTaskBox.classList.remove("hidden");
+            });
+
+            //create new Task
+
+
+            //cancel Task creation
+            const cancelTaskButton = this.element.querySelector('#cancelTask');
+            cancelTaskButton.addEventListener("click", () => {
+              newTaskBox.classList.add("hidden");
+              newTaskButton.disabled = false;
+            });
+
         }
         this.deleteAllCategories = async() => {
             const cats = await this.cat.get();
             cats.forEach((element) => {
                 this.cat.del(element.key);
                 console.log("Category: " + element.key + " wurde ausradiert!");
-            })
+            });
         }
         this.deleteAllTasks = async() => {
             const tasks = await this.task.get();
             tasks.forEach(element => {
                 this.task.del(element.key);
                 console.log("Task: " + element.key + " wurde ausradiert!");
-            })
+            });
         }
     }
 }
