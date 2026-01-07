@@ -1,0 +1,4 @@
+Checkmark icon by https://github.com/instructure/instructure-ui?ref=svgrepo.com Instructure Ui in MIT License via https://www.svgrepo.com/ SVG Repo
+Bin icon by https://github.com/fabric-ds/icons?ref=svgrepo.com Fabric Design System in MIT License via https://www.svgrepo.com/ SVG Repo
+Trophy Icon by https://www.pixelbazaar.com/goodie/responsive-icons?ref=svgrepo.com Pixelbazaar in CC Attribution License via https://www.svgrepo.com/ SVG Repo
+Plus icon by https://dazzleui.gumroad.com/l/dazzleiconsfree?ref=svgrepo.com Dazzle Ui in CC Attribution License via https://www.svgrepo.com/ SVG Repo

@@ -1,6 +1,7 @@
 #element {
     --blue: #2b7efd;
     --blue_hover: #2b6efd;
+    --orange: #cd8901;
 }
 
 header {
@@ -17,7 +18,6 @@ header {
 }
 #main {
     width: 100%;
-    height: 100%;
     display: flex;
     column-gap: 10px;
     background-color: #efefef;
@@ -32,7 +32,7 @@ header {
         flex-basis: 40%;
         align-items: center;
     }
-    #tasks {
+    #taskArea {
         display: flex;
         flex-direction: column;
         flex-basis: 60%;
@@ -58,7 +58,6 @@ header {
 
         & #newTaskInputs {
             display: flex;
-            flex-grow:1;
             gap: 4px;
 
             & #dateLabel {
@@ -67,17 +66,15 @@ header {
             & #pointsLabel {
                 flex-basis: 50%;
             }
-
         }
-
         & #newTaskButtons {
             display:flex;
             gap: 10px;
 
-            & #createTask {
+            & #createTaskButton {
                 flex-basis: 80%;
             }
-            & #cancelTask {
+            & #cancelTaskButton {
                 flex-basis: 20%;
             }
         }
@@ -125,13 +122,67 @@ input:focus {
 .secondary:hover {
     background-color: #b8b8b8;
 }
-.column {
-    display:flex;
-    flex-direction: column;
+#taskArea {
+
+    & #noTaskInfo.hidden {
+        display:none;
+    }
 }
-.center {
-    align-items: center;
+#taskList {
+    & >div {
+        border: 1px lightgray solid;
+        border-radius: 12px;
+        padding: 12px;
+        box-shadow: 0 0 5px #b8b8b8;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+
+        & .task-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            & .collapse {
+                min-width: 0;
+                overflow-wrap: anywhere;
+            }
+
+            & .svg-wrapper {
+                display: flex;
+                gap: 5px;
+
+                & .icon-box-bin, & .icon-box-checkmark {
+                    width: 32px;
+                    height: 32px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 6px;
+                }
+
+                & .icon-box-checkmark {
+                    background-color: green;
+                }
+
+                & .icon-box-bin {
+                    background-color: gray;
+                }
+
+                & .icon-box-bin svg, & .icon-box-checkmark svg {
+                    width: 18px;
+                    height: 18px;
+                    display: block;
+                }
+            }
+        }
+        & .task-row-2{
+            display:flex;
+            justify-content:space-between;
+        }
+    }
 }
-h1,h3,p {
-    margin : 0;
-}
+
+    h1,h3,p {
+        margin : 0;
+    }
