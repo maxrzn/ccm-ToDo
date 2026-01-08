@@ -45,6 +45,7 @@ ccm.files['ccm.todo.js'] = {
             newTaskButton.addEventListener("click", () => {
                 newTaskButton.disabled = true;
                 newTaskBox.classList.remove("hidden");
+                newTaskBox.querySelector("#taskContent").focus();
             });
 
             //create new Task
@@ -56,7 +57,6 @@ ccm.files['ccm.todo.js'] = {
                 });
             });
             createTaskButton.addEventListener("click", async() => {
-                console.log("click");
                 await this.task.set({
                     content: this.element.querySelector("#taskContent").value,
                     deadline: this.element.querySelector("#taskDeadline").value,
@@ -86,6 +86,10 @@ ccm.files['ccm.todo.js'] = {
             });
 
         }
+        /**
+         * iterates through tasks list, shows open tasks and completed task
+         * @returns {Promise<void>}
+         */
         this.showTasks = async() => {
             const tasks = await this.task.get();
             const noTaskInfo = this.element.querySelector("#noTaskInfo");
@@ -94,14 +98,29 @@ ccm.files['ccm.todo.js'] = {
                     noTaskInfo.classList.add("hidden");
                 }
                 const taskList = this.element.querySelector("#taskList");
+                const taskHistory = this.element.querySelector("#taskHistory");
                 taskList.innerHTML = "";
                 tasks.forEach((task) => {
-                    taskList.appendChild(this.ccm.helper.html(this.html.task, {taskContent: task.content, taskPoints: task.points, taskDeadline: task.deadline }));
+                    if(task.status==="open") {
+                        const taskel = this.ccm.helper.html(this.html.task, {taskContent: task.content, taskPoints: task.points, taskDeadline: task.deadline });
+                        taskel.setAttribute("id", task.key);
+                        taskel.querySelector(".deleteTaskButton").addEventListener("click", async (e) => {
+                            const taskDiv = e.target.closest("div[id]");
+                            taskDiv.remove();
+                            this.task.del(taskDiv.getAttribute("id"));
+                        });
+                        taskList.appendChild(taskel);
+                    } else {
+                        const taskel = this.ccm.helper.html(this.html.completedTask, {completedContent: task.content, points: task.points, completedDate:  new Date().toLocaleDateString("de-DE")});
+                        //TODO hier weitermachen (append, eventuell task id zur div setzen)
+                    }
+
                 })
             } else {
                 noTaskInfo.classList.remove("hidden");
             }
         }
+
         this.clearInputs = () => {
             const input = this.element.querySelectorAll("input");
             input.forEach((i) => {
