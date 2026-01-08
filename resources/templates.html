@@ -63,10 +63,13 @@
             <span>Keine offenen Aufgaben</span>
             <span>Erstellen Sie eine neue Aufgabe, um loszulegen</span>
         </div>
+        <div id="taskHistory" class="hidden">
+
+        </div>
     </div>
 </ccm-template>
 
-<!--<ccm-template key="task">
+<!--<ccm-template key="">
     <div class="task">
         <div class="task-row">
             <p>%taskContent%</p>
@@ -91,12 +94,19 @@
         <div class="task-row">
             <p class="collapse">%taskContent%</p>
             <div class="svg-wrapper">
-                <button> check </button>
-                <button> delete</button>
+                <button class="completeTaskButton"> check </button>
+                <button class="deleteTaskButton"> delete </button>
             </div>
         </div>
         <div class="task-row-2">
             <p>%taskPoints%</p>
             <p>%taskDeadline%</p>
         </div>
+</ccm-template>
+<ccm-template key="completedTask">
+    <div class="task-row">
+        <p class="collapse" style="text-decoration: line-through;">%completedContent%</p>
+        <p style="color:green">+%points% Punkte</p>
+        <p>%completedDate%</p>
+    </div>
 </ccm-template>
