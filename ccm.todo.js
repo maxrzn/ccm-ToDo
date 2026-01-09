@@ -26,7 +26,7 @@ ccm.files['ccm.todo.js'] = {
             this.element.appendChild((this.ccm.helper.html(this.html.header, {userId: userId})));
             this.element.appendChild(main);
             main.appendChild(this.ccm.helper.html(this.html.catArea));
-            main.appendChild(this.ccm.helper.html(this.html.taskArea));
+            main.appendChild(this.ccm.helper.html(this.html.taskArea, {title : "Meine Aufgaben"}));
 
             const userCats = await this.cat.get({ownerId: userId}); //check for existing categories
             if(!userCats.length) {
@@ -38,6 +38,8 @@ ccm.files['ccm.todo.js'] = {
             } else {
                 await this.showTasks();
             }
+            //show categories
+            await this.showCategories();
 
             //open new Task creation
             const newTaskButton = this.element.querySelector("#newTaskButton");
@@ -84,6 +86,15 @@ ccm.files['ccm.todo.js'] = {
             const clearHistoryButton = this.element.querySelector("#clearHistoryButton");
             clearHistoryButton.addEventListener("click", async() =>  await this.deleteAllTasks("closed"));
 
+        }
+        this.showCategories = async() => {
+            const cats = await this.cat.get({ownerId: userId});
+            const categoryList = this.element.querySelector("#categoryList");
+
+            for (const cat of cats) {
+                const taskCount = (await this.task.get({categoryId : cat.title, status:"open"})).length;
+                categoryList.append(this.ccm.helper.html(this.html.category, {title:cat.title, taskCount:taskCount }));
+            }
         }
         /**
          * iterates through tasks list, shows open tasks and completed task
