@@ -110,8 +110,12 @@ ccm.files['ccm.todo.js'] = {
          */
         this.insertOpenTask = (task) => {
             const taskList = this.element.querySelector("#taskList");
-            console.log(task.content);
-            const taskel = this.ccm.helper.html(this.html.task, {taskContent: task.content, taskPoints: task.points, taskDeadline: task.deadline });
+            const taskDeadline = task.deadline ? new Date(task.deadline).toLocaleDateString("De-de") : "";
+            const taskel = this.ccm.helper.html(this.html.task, {
+                taskContent: task.content,
+                taskPoints: task.points ?? "",
+                taskDeadline: taskDeadline
+            });
             taskel.setAttribute("id", task.key);
             //deleteTask Button
             taskel.querySelector(".deleteTaskButton").addEventListener("click", async (e) => {
