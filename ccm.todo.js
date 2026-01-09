@@ -57,7 +57,7 @@ ccm.files['ccm.todo.js'] = {
                 });
             });
             createTaskButton.addEventListener("click", async() => {
-                await this.task.set({
+                const newTask = await this.task.set({
                     content: this.element.querySelector("#taskContent").value,
                     deadline: this.element.querySelector("#taskDeadline").value,
                     points: this.element.querySelector("#taskPoints").value,
@@ -69,12 +69,7 @@ ccm.files['ccm.todo.js'] = {
                 newTaskButton.disabled = false;
                 this.clearInputs();
                 //show updated Tasklist
-                await this.showTasks();
-                const tasks = await this.task.get();
-                console.log("TaskList");
-                tasks.forEach((element) => {
-                    console.log(element);
-                })
+                this.insertOpenTask(await this.task.get(newTask))
             });
 
             //cancel Task creation
@@ -85,6 +80,10 @@ ccm.files['ccm.todo.js'] = {
               this.clearInputs();
             });
 
+            //clear history Button
+            const clearHistoryButton = this.element.querySelector("#clearHistoryButton");
+            clearHistoryButton.addEventListener("click", async() =>  await this.deleteAllTasks("closed"));
+
         }
         /**
          * iterates through tasks list, shows open tasks and completed task
@@ -92,12 +91,9 @@ ccm.files['ccm.todo.js'] = {
          */
         this.showTasks = async() => {
             const tasks = await this.task.get();
-            const noTaskInfo = this.element.querySelector("#noTaskInfo");
             if(tasks.length) {
-                if(noTaskInfo.classList.length === 0) {
-                    noTaskInfo.classList.add("hidden");
-                }
                 this.element.querySelector("#taskList").innerHTML = "";
+                this.element.querySelector("#taskHistory").innerHTML = "";
                 tasks.forEach((task) => {
                     if(task.status==="open") {
                         this.insertOpenTask(task);
@@ -105,9 +101,8 @@ ccm.files['ccm.todo.js'] = {
                         this.insertCompletedTask(task);
                     }
                 });
-            } else {
-                noTaskInfo.classList.remove("hidden");
             }
+            this.updateNoTaskInfo();
         }
         /**
          * inserts completed task into taskList div
@@ -115,23 +110,30 @@ ccm.files['ccm.todo.js'] = {
          */
         this.insertOpenTask = (task) => {
             const taskList = this.element.querySelector("#taskList");
+            console.log(task.content);
             const taskel = this.ccm.helper.html(this.html.task, {taskContent: task.content, taskPoints: task.points, taskDeadline: task.deadline });
             taskel.setAttribute("id", task.key);
+            //deleteTask Button
             taskel.querySelector(".deleteTaskButton").addEventListener("click", async (e) => {
                 const taskDiv = e.target.closest("div[id]");
                 taskDiv.remove();
                 this.task.del(taskDiv.getAttribute("id"));
-                //TODO trigger tasklist refresh for other participents if needed
+                this.updateNoTaskInfo();
+                //TODO trigger tasklist refresh for other participants if needed
             });
+            //completeTask Button
             taskel.querySelector(".completeTaskButton").addEventListener("click", async (e) => {
                 const taskHistory = this.element.querySelector("#taskHistory");
                 const taskDiv = e.target.closest("div[id]");
                 taskDiv.remove();
-                this.task.set({key : taskDiv.getAttribute("id"), status : 'closed' });
-                taskHistory.insertBefore(taskDiv, taskHistory.firstChild);
-                //TODO trigger tasklist refresh for other participents if needed
+                const taskKey = taskDiv.getAttribute("id");
+                this.task.set({key : taskKey, status : 'closed' });
+                this.insertCompletedTask(await this.task.get(taskKey));
+                this.updateNoTaskInfo();
+                //TODO trigger tasklist refresh for other participants if needed
             })
-            taskList.appendChild(taskel);
+            taskList.prepend(taskel);
+            this.updateNoTaskInfo();
         }
         /**
          * inserts completed task as first Child of taskHistory div
@@ -141,8 +143,14 @@ ccm.files['ccm.todo.js'] = {
             const taskHistory = this.element.querySelector("#taskHistory");
             taskHistory.classList.toggle("hidden", false);
             const taskel = this.ccm.helper.html(this.html.completedTask, {completedContent: task.content, points: task.points, completedDate:  new Date().toLocaleDateString("de-DE")});
-            console.log(taskel);
-            taskHistory.appendChild(taskel);
+            taskel.setAttribute("id", task.key);
+            taskHistory.prepend(taskel);
+        }
+
+        this.updateNoTaskInfo = () => {
+            const noTaskInfo = this.element.querySelector("#noTaskInfo");
+            const taskList = this.element.querySelector("#taskList");
+            noTaskInfo.classList.toggle("hidden", taskList.hasChildNodes());
         }
 
         this.clearInputs = () => {
@@ -159,12 +167,16 @@ ccm.files['ccm.todo.js'] = {
                 console.log("Category: " + element.key + " wurde ausradiert!");
             });
         }
-        this.deleteAllTasks = async() => {
-            const tasks = await this.task.get();
+        this.deleteAllTasks = async(status) => {
+            const tasks = await this.task.get({status : status});
             tasks.forEach(element => {
                 this.task.del(element.key);
                 console.log("Task: " + element.key + " wurde ausradiert!");
             });
+            if(status === "closed") {
+                const t = this.element.querySelectorAll("#taskHistory .task-row");
+                t.forEach((t) => t.remove());
+            }
         }
     }
 }
