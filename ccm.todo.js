@@ -97,28 +97,52 @@ ccm.files['ccm.todo.js'] = {
                 if(noTaskInfo.classList.length === 0) {
                     noTaskInfo.classList.add("hidden");
                 }
-                const taskList = this.element.querySelector("#taskList");
-                const taskHistory = this.element.querySelector("#taskHistory");
-                taskList.innerHTML = "";
+                this.element.querySelector("#taskList").innerHTML = "";
                 tasks.forEach((task) => {
                     if(task.status==="open") {
-                        const taskel = this.ccm.helper.html(this.html.task, {taskContent: task.content, taskPoints: task.points, taskDeadline: task.deadline });
-                        taskel.setAttribute("id", task.key);
-                        taskel.querySelector(".deleteTaskButton").addEventListener("click", async (e) => {
-                            const taskDiv = e.target.closest("div[id]");
-                            taskDiv.remove();
-                            this.task.del(taskDiv.getAttribute("id"));
-                        });
-                        taskList.appendChild(taskel);
+                        this.insertOpenTask(task);
                     } else {
-                        const taskel = this.ccm.helper.html(this.html.completedTask, {completedContent: task.content, points: task.points, completedDate:  new Date().toLocaleDateString("de-DE")});
-                        //TODO hier weitermachen (append, eventuell task id zur div setzen)
+                        this.insertCompletedTask(task);
                     }
-
-                })
+                });
             } else {
                 noTaskInfo.classList.remove("hidden");
             }
+        }
+        /**
+         * inserts completed task into taskList div
+         * @param task task object
+         */
+        this.insertOpenTask = (task) => {
+            const taskList = this.element.querySelector("#taskList");
+            const taskel = this.ccm.helper.html(this.html.task, {taskContent: task.content, taskPoints: task.points, taskDeadline: task.deadline });
+            taskel.setAttribute("id", task.key);
+            taskel.querySelector(".deleteTaskButton").addEventListener("click", async (e) => {
+                const taskDiv = e.target.closest("div[id]");
+                taskDiv.remove();
+                this.task.del(taskDiv.getAttribute("id"));
+                //TODO trigger tasklist refresh for other participents if needed
+            });
+            taskel.querySelector(".completeTaskButton").addEventListener("click", async (e) => {
+                const taskHistory = this.element.querySelector("#taskHistory");
+                const taskDiv = e.target.closest("div[id]");
+                taskDiv.remove();
+                this.task.set({key : taskDiv.getAttribute("id"), status : 'closed' });
+                taskHistory.insertBefore(taskDiv, taskHistory.firstChild);
+                //TODO trigger tasklist refresh for other participents if needed
+            })
+            taskList.appendChild(taskel);
+        }
+        /**
+         * inserts completed task as first Child of taskHistory div
+         * @param task task object
+         */
+        this.insertCompletedTask = (task) => {
+            const taskHistory = this.element.querySelector("#taskHistory");
+            taskHistory.classList.toggle("hidden", false);
+            const taskel = this.ccm.helper.html(this.html.completedTask, {completedContent: task.content, points: task.points, completedDate:  new Date().toLocaleDateString("de-DE")});
+            console.log(taskel);
+            taskHistory.appendChild(taskel);
         }
 
         this.clearInputs = () => {
