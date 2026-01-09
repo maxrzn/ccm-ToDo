@@ -22,12 +22,12 @@
 
 <ccm-template key="taskArea">
     <div id="taskArea" class="div-outline">
-        <div id="taskHeader">
+        <menu id="taskHeader">
             <p>Meine Aufgaben</p>
             <button id="newTaskButton" class="primary">
                 + Neue Aufgabe
             </button>
-        </div>
+        </menu>
 
         <div id="newTaskBox" class="hidden">
             <div>
@@ -63,8 +63,12 @@
             <span>Keine offenen Aufgaben</span>
             <span>Erstellen Sie eine neue Aufgabe, um loszulegen</span>
         </div>
-        <div id="taskHistory" class="hidden">
-
+        <div>
+            <menu style="display:flex; justify-content:space-between">
+                <p>Aufgabenverlauf</p>
+                <button id="clearHistoryButton">clear</button>
+            </menu>
+            <div id="taskHistory" class="hidden"></div>
         </div>
     </div>
 </ccm-template>

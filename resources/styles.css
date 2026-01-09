@@ -206,6 +206,10 @@ input:focus {
         }
     }
 }
+menu {
+    padding-inline-start: 5px;
+    padding-inline-end: 5px;
+}
 
 h1,h3,p {
     margin : 0;
