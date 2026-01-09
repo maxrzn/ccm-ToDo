@@ -102,6 +102,7 @@ ccm.files['ccm.todo.js'] = {
                     }
                 });
             }
+            this.updateHistoryVisibility();
             this.updateNoTaskInfo();
         }
         /**
@@ -134,6 +135,7 @@ ccm.files['ccm.todo.js'] = {
                 this.task.set({key : taskKey, status : 'closed' });
                 this.insertCompletedTask(await this.task.get(taskKey));
                 this.updateNoTaskInfo();
+                this.updateHistoryVisibility();
                 //TODO trigger tasklist refresh for other participants if needed
             })
             taskList.prepend(taskel);
@@ -146,7 +148,12 @@ ccm.files['ccm.todo.js'] = {
         this.insertCompletedTask = (task) => {
             const taskHistory = this.element.querySelector("#taskHistory");
             taskHistory.classList.toggle("hidden", false);
-            const taskel = this.ccm.helper.html(this.html.completedTask, {completedContent: task.content, points: task.points, completedDate:  new Date().toLocaleDateString("de-DE")});
+            const points = task.points ? "+" + task.points + " Punkte" : "";
+            const taskel = this.ccm.helper.html(this.html.completedTask, {
+                completedContent: task.content,
+                points: points,
+                completedDate:  new Date().toLocaleDateString("de-DE")
+            });
             taskel.setAttribute("id", task.key);
             taskHistory.prepend(taskel);
         }
@@ -155,6 +162,13 @@ ccm.files['ccm.todo.js'] = {
             const noTaskInfo = this.element.querySelector("#noTaskInfo");
             const taskList = this.element.querySelector("#taskList");
             noTaskInfo.classList.toggle("hidden", taskList.hasChildNodes());
+        }
+
+        this.updateHistoryVisibility = () => {
+            const history = this.element.querySelector("#historyArea");
+            const t = this.element.querySelectorAll("#taskHistory .taskHistory-row");
+            if (!history) return;
+            history.classList.toggle("hidden", t.length === 0);
         }
 
         this.clearInputs = () => {
@@ -170,6 +184,7 @@ ccm.files['ccm.todo.js'] = {
                 this.cat.del(element.key);
                 console.log("Category: " + element.key + " wurde ausradiert!");
             });
+
         }
         this.deleteAllTasks = async(status) => {
             const tasks = await this.task.get({status : status});
@@ -178,8 +193,9 @@ ccm.files['ccm.todo.js'] = {
                 console.log("Task: " + element.key + " wurde ausradiert!");
             });
             if(status === "closed") {
-                const t = this.element.querySelectorAll("#taskHistory .task-row");
+                const t = this.element.querySelectorAll("#taskHistory .taskHistory-row");
                 t.forEach((t) => t.remove());
+                this.updateHistoryVisibility();
             }
         }
     }

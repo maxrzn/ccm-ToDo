@@ -17,11 +17,15 @@
 </ccm-template>
 
 <ccm-template key="catArea">
-<div id="categories" class="div-outline" >Kategorien</div>
+    <div id="categoryArea">
+        <menu id="categoryHeader">
+            <p>Kategorien</p>
+        </menu>
+    </div>
 </ccm-template>
 
 <ccm-template key="taskArea">
-    <div id="taskArea" class="div-outline">
+    <div id="taskArea">
         <menu id="taskHeader">
             <p>Meine Aufgaben</p>
             <button id="newTaskButton" class="primary">
@@ -63,10 +67,10 @@
             <span>Keine offenen Aufgaben</span>
             <span>Erstellen Sie eine neue Aufgabe, um loszulegen</span>
         </div>
-        <div>
-            <menu style="display:flex; justify-content:space-between">
+        <div id="historyArea" class="hidden">
+            <menu style="display:flex; justify-content:space-between; align-items:center">
                 <p>Aufgabenverlauf</p>
-                <button id="clearHistoryButton">clear</button>
+                <button id="clearHistoryButton" class="secondary">Verlauf löschen</button>
             </menu>
             <div id="taskHistory" class="hidden"></div>
         </div>
@@ -108,9 +112,11 @@
         </div>
 </ccm-template>
 <ccm-template key="completedTask">
-    <div class="task-row">
+    <div class="taskHistory-row">
         <p class="collapse" style="text-decoration: line-through;">%completedContent%</p>
-        <p style="color:green">+%points% Punkte</p>
-        <p>%completedDate%</p>
+        <p class="info">
+            <span class="points">%points%</span>
+            <span> %completedDate% </span>
+        </p>
     </div>
 </ccm-template>
