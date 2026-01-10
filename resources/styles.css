@@ -49,6 +49,9 @@ header {
         & #categoryList {
             display: flex;
             flex-direction : column;
+            gap:5px;
+            margin-left: 15px;
+            margin-right: 15px;
 
             .category {
                 display: flex;
@@ -61,11 +64,14 @@ header {
                 border: 1px solid #e5e5e5;
 
                 cursor: pointer;
+
+                &.selected {
+                    border-color: var(--blue);
+                }
             }
 
-            .category:hover {
+            .category:hover:not(.selected) {
                 border-color: #d0d7ff;
-                box-shadow: 0 2px 6px rgba(0,0,0,0.05);
             }
 
             .catLeft {
@@ -91,6 +97,9 @@ header {
                 background: #eaf0ff;
                 color: #2b7efd;
                 font-weight: 500;
+            }
+            .hidden{
+                display:none;
             }
 
             .catInfo {

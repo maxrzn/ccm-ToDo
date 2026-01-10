@@ -59,12 +59,13 @@ ccm.files['ccm.todo.js'] = {
                 });
             });
             createTaskButton.addEventListener("click", async() => {
+                const categoryId = this.element.querySelector("#categoryList .selected").id;
                 const newTask = await this.task.set({
                     content: this.element.querySelector("#taskContent").value,
                     deadline: this.element.querySelector("#taskDeadline").value,
                     points: this.element.querySelector("#taskPoints").value,
                     status: "open",
-                    categoryId: "default", //TODO dynamically set category
+                    categoryId: categoryId,
                     userId: userId
                 });
                 newTaskBox.classList.add("hidden");
@@ -87,21 +88,38 @@ ccm.files['ccm.todo.js'] = {
             clearHistoryButton.addEventListener("click", async() =>  await this.deleteAllTasks("closed"));
 
         }
+        /**
+         * shows all categories
+         * @returns {Promise<void>}
+         */
         this.showCategories = async() => {
             const cats = await this.cat.get({ownerId: userId});
             const categoryList = this.element.querySelector("#categoryList");
 
             for (const cat of cats) {
                 const taskCount = (await this.task.get({categoryId : cat.title, status:"open"})).length;
-                categoryList.append(this.ccm.helper.html(this.html.category, {title:cat.title, taskCount:taskCount }));
+                const newCat = this.ccm.helper.html(this.html.category, {categoryKey:cat.key ,title:cat.title, taskCount:taskCount });
+                if(cat.title === "default") {
+                    newCat.querySelector(".catStandard").classList.remove("hidden");
+                    newCat.classList.add("selected");
+                }
+                newCat.addEventListener("click", (e) => this.selectCategory(e));
+                categoryList.append(newCat);
             }
+        }
+
+        this.selectCategory = async(e) => {
+            if(e.target.classList.contains("selected")) return;
+            this.highlightCategory(e.target);
+            await this.showTasks(e.target.id);
         }
         /**
          * iterates through tasks list, shows open tasks and completed task
          * @returns {Promise<void>}
          */
-        this.showTasks = async() => {
-            const tasks = await this.task.get();
+        this.showTasks = async(categoryKey) => {
+            const tasks = await this.task.get({categoryId: categoryKey });
+            console.log(tasks);
             if(tasks.length) {
                 this.element.querySelector("#taskList").innerHTML = "";
                 this.element.querySelector("#taskHistory").innerHTML = "";
@@ -115,6 +133,9 @@ ccm.files['ccm.todo.js'] = {
             }
             this.updateHistoryVisibility();
             this.updateNoTaskInfo();
+            //TODO remove
+            const ts = await this.task.get();
+            console.log(ts);
         }
         /**
          * inserts completed task into taskList div
@@ -209,7 +230,11 @@ ccm.files['ccm.todo.js'] = {
                 this.updateHistoryVisibility();
             }
         }
-    }
+        this.highlightCategory = (target) => {
+            this.element.querySelector("#categoryList .selected").classList.remove("selected");
+            target.classList.add("selected");
+        }
+    },
 }
 
 
