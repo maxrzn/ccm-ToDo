@@ -120,9 +120,10 @@ ccm.files['ccm.todo.js'] = {
         this.showTasks = async(categoryKey) => {
             const tasks = await this.task.get({categoryId: categoryKey });
             console.log(tasks);
+
+            this.element.querySelector("#taskList").innerHTML = "";
+            this.element.querySelector("#taskHistory").innerHTML = "";
             if(tasks.length) {
-                this.element.querySelector("#taskList").innerHTML = "";
-                this.element.querySelector("#taskHistory").innerHTML = "";
                 tasks.forEach((task) => {
                     if(task.status==="open") {
                         this.insertOpenTask(task);
