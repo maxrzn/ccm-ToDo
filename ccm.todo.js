@@ -26,7 +26,7 @@ ccm.files['ccm.todo.js'] = {
             this.element.appendChild((this.ccm.helper.html(this.html.header, {userId: userId})));
             this.element.appendChild(main);
             main.appendChild(this.ccm.helper.html(this.html.catArea));
-            main.appendChild(this.ccm.helper.html(this.html.taskArea, {title : "Meine Aufgaben"}));
+            main.appendChild(this.ccm.helper.html(this.html.taskArea));
 
             const userCats = await this.cat.get({ownerId: userId}); //check for existing categories
             if(!userCats.length) {
@@ -36,7 +36,11 @@ ccm.files['ccm.todo.js'] = {
                     members : []
                 });
             } else {
-                await this.showTasks();
+                const defaultCatKey = (await this.cat.get({
+                    ownerId: userId,
+                    title: "default"
+                }))[0].key;
+                await this.showTasks(defaultCatKey);
             }
             //show categories
             await this.showCategories();
@@ -120,9 +124,10 @@ ccm.files['ccm.todo.js'] = {
          * @returns {Promise<void>}
          */
         this.showTasks = async(categoryKey) => {
+            const categoryName = (await this.cat.get(categoryKey)).title;
             const tasks = await this.task.get({categoryId: categoryKey });
             console.log(tasks);
-
+            this.element.querySelector("#categoryTitle").innerHTML = categoryName; //change category name
             this.element.querySelector("#taskList").innerHTML = "";
             this.element.querySelector("#taskHistory").innerHTML = "";
             if(tasks.length) {
@@ -240,5 +245,5 @@ ccm.files['ccm.todo.js'] = {
     },
 }
 
-
+//TODO grid layout for main areas, category height indepenent from task window height
 
