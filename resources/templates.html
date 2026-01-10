@@ -103,12 +103,12 @@
     </div>
 </ccm-template>-->
 <ccm-template key="category">
-    <div class="category">
+    <div id=%categoryKey% class="category">
 
         <div class="catLeft">
             <div class="catInfo">
                 <span class="catTitle">%title%</span>
-                <span class="catStandard">Standard</span>
+                <span class="catStandard hidden">Standard</span>
             </div>
 
             <div class="catTaskCount">
@@ -125,14 +125,7 @@
 
     </div>
 </ccm-template>
-<ccm-template key="">
-    <div class="cat-row">
-        <p>
-            <span>%title%</span>
-            <span class="taskCount">%taskCount% Aufgaben</span>
-        </p>
-    </div>
-</ccm-template>
+
 <ccm-template key="task">
         <div class="task-row">
             <p class="collapse">%taskContent%</p>
