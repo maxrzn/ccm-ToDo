@@ -109,7 +109,9 @@ ccm.files['ccm.todo.js'] = {
         }
 
         this.selectCategory = async(e) => {
-            if(e.target.classList.contains("selected")) return;
+            if(e.target.classList.contains("selected")) return; //category already Selected
+            this.element.querySelector("#newTaskBox").classList.toggle("hidden", true);//close task creation window if necessary
+            this.element.querySelector("#newTaskButton").disabled = false; //enable button
             this.highlightCategory(e.target);
             await this.showTasks(e.target.id);
         }
