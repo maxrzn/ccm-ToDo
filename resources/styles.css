@@ -46,6 +46,30 @@ header {
             align-items: center;
             gap: 10px;
         }
+        & #newCatBox {
+            display: flex;
+            flex-direction: column;
+            gap:5px;
+            margin-left: 20px;
+            margin-right: 20px;
+            margin-bottom: 10px;
+
+            &.hidden {
+                display: none;
+            }
+
+            & #newCatButtons {
+                display: flex;
+                gap: 10px;
+
+                & .primary {
+                    flex-basis: 80%;
+                }
+                & .secondary {
+                    flex-basis: 20%;
+                }
+            }
+        }
         & #categoryList {
             display: flex;
             flex-direction : column;
