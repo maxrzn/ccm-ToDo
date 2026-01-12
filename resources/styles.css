@@ -17,6 +17,13 @@ header {
         justify-content: space-between;
         align-items: center;
         gap: 10px;
+
+        & #pointsDisplay {
+            background-color: #FFFBEB;
+            border: 2px solid #fff0ab;
+            border-radius: 12px;
+            padding: 10px;
+        }
     }
 }
 #main {
@@ -76,6 +83,7 @@ header {
             gap:5px;
             margin-left: 15px;
             margin-right: 15px;
+            margin-bottom: 10px;
 
             .category {
                 display: flex;
@@ -141,6 +149,7 @@ header {
         flex-direction: column;
         flex-basis: 60%;
         gap: 10px;
+        overflow-y :auto;
 
         border: 1px lightgray solid;
         border-radius: 12px;
@@ -252,6 +261,7 @@ input:focus {
     gap: 7px;
     margin-left: 15px;
     margin-right: 15px;
+    margin-bottom:10px;
     & > div {
         border: 2px #dddddd solid;
         border-radius: 12px;
