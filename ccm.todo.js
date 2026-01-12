@@ -67,6 +67,7 @@ ccm.files['ccm.todo.js'] = {
                 });
                 this.closeNewCatBox();
                 await this.insertCategory(await this.cat.get(newCat));
+
             });
 
             //cancel Category creation
@@ -110,6 +111,7 @@ ccm.files['ccm.todo.js'] = {
                 this.clearInputs();
                 //show updated Tasklist
                 this.insertOpenTask(await this.task.get(newTask))
+                await this.updateTaskCount(categoryId);
             });
 
             //cancel Task creation
@@ -122,7 +124,11 @@ ccm.files['ccm.todo.js'] = {
 
             //clear history Button
             const clearHistoryButton = this.element.querySelector("#clearHistoryButton");
-            clearHistoryButton.addEventListener("click", async() =>  await this.deleteAllTasks("closed"));
+            clearHistoryButton.addEventListener("click", async() =>  {
+                const categoryList = this.element.querySelector("#categoryList");
+                const categoryId = categoryList.querySelector(".selected").id;
+                await this.deleteTasks(categoryId, "closed");
+            });
 
         }
         /**
@@ -132,39 +138,60 @@ ccm.files['ccm.todo.js'] = {
         this.showCategories = async() => {
             const cats = await this.cat.get({ownerId: userId});
             for (const cat of cats) {
+                console.log(cat);
                 await this.insertCategory(cat);
             }
         }
-        /**
-         * creates category and displays it
-         * @returns {Promise<void>}
-         */
-        this.createCategory = async () => {
 
-        }
         /**
          * inserts a single cat element into div #categoryList
          * @param cat category object from database
          * @returns {Promise<void>}
          */
         this.insertCategory = async(cat) => {
-            const taskCount = (await this.task.get({categoryId : cat.title, status:"open"})).length;
+            const taskCount = (await this.task.get({ownerId: this.userId, categoryId : cat.key, status:"open"})).length;
             const newCat = this.ccm.helper.html(this.html.category, {categoryKey:cat.key ,title:cat.title, taskCount:taskCount });
             if(cat.title === "default") {
                 newCat.querySelector(".catStandard").classList.remove("hidden");
+                newCat.querySelector(".catButtons").remove();
                 newCat.classList.add("selected");
+                newCat.classList.add("default");
+            } else {
+                //delete Category listener
+                newCat.querySelector(".delete").addEventListener("click", async(e) => {
+                    console.log("trash");
+                    const categoryElement = e.target.closest("div[id]");
+                    await this.deleteCategory(categoryElement.id);
+                    categoryElement.remove();
+                    await this.selectCategory();
+                });
             }
+            //select Category listener
             newCat.addEventListener("click", (e) => this.selectCategory(e));
             this.element.querySelector("#categoryList").append(newCat);
+            await this.selectCategory(newCat);
         }
 
         this.selectCategory = async(e) => {
-            if(e.target.classList.contains("selected")) return; //category already Selected
+            console.log("select");
+            let target;
+            if(e && e.target) {//called from click event
+                target = e.target.closest(".category");
+                console.log(target);
+            } else if (e instanceof HTMLElement) {
+                target = e;
+            } else { //called manually -> select first category in categorylist
+                target = this.element.querySelector("#categoryList > .category");
+                console.log("manually" +target);
+            }
+            if(target.classList.contains("selected")) return; //category already Selected
             this.element.querySelector("#newTaskBox").classList.toggle("hidden", true);//close task creation window if necessary
             this.element.querySelector("#newTaskButton").disabled = false; //enable button
-            this.highlightCategory(e.target);
-            await this.showTasks(e.target.id);
+            this.highlightCategory(target);
+            console.log("targetID" + target.id);
+            await this.showTasks(target.id);
         }
+
         /**
          * iterates through tasks list, shows open tasks and completed task
          * @returns {Promise<void>}
@@ -208,8 +235,10 @@ ccm.files['ccm.todo.js'] = {
             taskel.querySelector(".deleteTaskButton").addEventListener("click", async (e) => {
                 const taskDiv = e.target.closest("div[id]");
                 taskDiv.remove();
-                this.task.del(taskDiv.getAttribute("id"));
+                const categoryId = (await this.task.get(taskDiv.getAttribute("id"))).categoryId;
+                await this.task.del(taskDiv.getAttribute("id"));
                 this.updateNoTaskInfo();
+                await this.updateTaskCount(categoryId);
                 //TODO trigger tasklist refresh for other participants if needed
             });
             //completeTask Button
@@ -219,9 +248,11 @@ ccm.files['ccm.todo.js'] = {
                 taskDiv.remove();
                 const taskKey = taskDiv.getAttribute("id");
                 this.task.set({key : taskKey, status : 'closed' });
-                this.insertCompletedTask(await this.task.get(taskKey));
+                const task = await this.task.get(taskKey);
+                this.insertCompletedTask(task);
                 this.updateNoTaskInfo();
                 this.updateHistoryVisibility();
+                await this.updateTaskCount(task.categoryId);
                 //TODO trigger tasklist refresh for other participants if needed
             })
             taskList.prepend(taskel);
@@ -256,6 +287,12 @@ ccm.files['ccm.todo.js'] = {
             if (!history) return;
             history.classList.toggle("hidden", t.length === 0);
         }
+        this.updateTaskCount = async (catId) => {
+            const cat = await this.cat.get(catId);
+            const taskCount = (await this.task.get({ownerId: this.userId, categoryId : cat.key, status:"open"})).length;
+            const catDiv = this.element.querySelector(`[id="${cat.key}"]`);
+            catDiv.querySelector(".taskCount").innerHTML = taskCount + " Aufgaben";
+        }
 
         this.clearInputs = () => {
             const input = this.element.querySelectorAll("input");
@@ -272,8 +309,20 @@ ccm.files['ccm.todo.js'] = {
             });
 
         }
-        this.deleteAllTasks = async(status) => {
-            const tasks = await this.task.get({status : status});
+        /**
+         * deletes category and all its tasks
+         * @param categoryId
+         * @returns {Promise<void>}
+         */
+        this.deleteCategory = async(categoryId) => {
+            await this.cat.del(categoryId);
+            await this.deleteTasks(categoryId, "");
+        }
+        this.deleteTasks = async(categoryId, status) => {
+            const query = {ownerId:this.userId, categoryId:categoryId};
+            if(status !== "") {query.status = status;}
+            const tasks = await this.task.get(query);
+            console.log("tasks" + tasks);
             tasks.forEach(element => {
                 this.task.del(element.key);
                 console.log("Task: " + element.key + " wurde ausradiert!");
@@ -285,8 +334,14 @@ ccm.files['ccm.todo.js'] = {
             }
         }
         this.highlightCategory = (target) => {
-            this.element.querySelector("#categoryList .selected").classList.remove("selected");
-            target.classList.add("selected");
+            const div = this.element.querySelector("#categoryList .selected");
+            if(div) {
+                div.classList.remove("selected");
+                target.classList.add("selected");
+            } else {
+                this.element.querySelector("#categoryList .default").classList.add("selected");
+            }
+
         }
     },
 }
