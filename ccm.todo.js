@@ -12,6 +12,10 @@ ccm.files['ccm.todo.js'] = {
             name: "mziege2s_tasks",
             url: "https://ccm2.inf.h-brs.de"
         }],
+        userWallet: ['ccm.store', {
+            name: "mziege2s_user",
+            url: "https://ccm2.inf.h-brs.de"
+        }],
         html: ['ccm.load', '././resources/templates.html'],
         css: ['ccm.load', '././resources/styles.css']
     },
@@ -182,13 +186,11 @@ ccm.files['ccm.todo.js'] = {
                 target = e;
             } else { //called manually -> select first category in categorylist
                 target = this.element.querySelector("#categoryList > .category");
-                console.log("manually" +target);
             }
             if(target.classList.contains("selected")) return; //category already Selected
             this.element.querySelector("#newTaskBox").classList.toggle("hidden", true);//close task creation window if necessary
             this.element.querySelector("#newTaskButton").disabled = false; //enable button
             this.highlightCategory(target);
-            console.log("targetID" + target.id);
             await this.showTasks(target.id);
         }
 
