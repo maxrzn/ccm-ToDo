@@ -204,6 +204,7 @@ ccm.files['ccm.todo.js'] = {
             this.element.querySelector("#taskList").innerHTML = "";
             this.element.querySelector("#taskHistory").innerHTML = "";
             if(tasks.length) {
+                tasks.sort((a,b) => new Date(a.updated_at) - new Date(b.updated_at));
                 tasks.forEach((task) => {
                     if(task.status==="open") {
                         this.insertOpenTask(task);
@@ -266,10 +267,11 @@ ccm.files['ccm.todo.js'] = {
             const taskHistory = this.element.querySelector("#taskHistory");
             taskHistory.classList.toggle("hidden", false);
             const points = task.points ? "+" + task.points + " Punkte" : "";
+            const completedDate = new Date(task.updated_at).toLocaleDateString("de-DE");
             const taskel = this.ccm.helper.html(this.html.completedTask, {
                 completedContent: task.content,
                 points: points,
-                completedDate:  new Date().toLocaleDateString("de-DE")
+                completedDate:  completedDate
             });
             taskel.setAttribute("id", task.key);
             taskHistory.prepend(taskel);
