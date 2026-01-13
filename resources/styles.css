@@ -11,11 +11,10 @@ header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 7px;
+    padding: 10px;
     margin-bottom: 20px;
 
     border-bottom: gray 1px solid;
-    border-radius: 12px;
     background-color: white;
 
     & nav {
@@ -47,6 +46,7 @@ header {
     #categoryArea {
         margin-left:20px;
         margin-right:10px;
+        margin-bottom: 20px;
         border: 1px lightgray solid;
         border-radius: 12px;
         box-shadow: 0 0 5px #b8b8b8;
@@ -155,7 +155,7 @@ header {
         gap: 10px;
         margin-right:20px;
         margin-left:10px;
-        overflow-y :auto;
+        margin-bottom: 20px;
 
         border: 1px lightgray solid;
         border-radius: 12px;
