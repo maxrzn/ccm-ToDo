@@ -31,7 +31,6 @@ ccm.files['ccm.todo.js'] = {
 
 
     Instance: function () {
-
         const userId = "testuser";
         this.start = async()=> {
             /*let data;
@@ -57,26 +56,39 @@ ccm.files['ccm.todo.js'] = {
                     spentPoints: 0
                 });
             }
-            //append main areas
+            //append header and view div
             this.element.innerHTML = "";
-
-            const main = this.ccm.helper.html(this.html.main);
             this.element.appendChild((this.ccm.helper.html(this.html.header, {userId: userId, points:await this.getBalance(userId)})));
-            this.element.appendChild(main);
+            this.view = document.createElement("div");
+            this.view.id = "view";
+            this.element.appendChild(this.view);
+
+            await this.switchView("tasks");
+
+        }
+
+        this.switchView = async(view) => {
+            if(view === "tasks") {
+                this.view.appendChild(this.ccm.helper.html(this.html.main));
+                await this.initTasks();
+            } else if(view === "shop") {
+
+            }
+        }
+
+        /**
+         * renders tasks view
+         * @returns {Promise<void>}
+         */
+        this.initTasks = async() =>{
+            const main = this.element.querySelector("#main");
             main.appendChild(this.ccm.helper.html(this.html.catArea));
             main.appendChild(this.ccm.helper.html(this.html.taskArea));
 
-            if(userCats.length) {
-                const defaultCatKey = (await this.cat.get({
-                    ownerId: userId,
-                    title: "default"
-                }))[0].key;
-                await this.showTasks(defaultCatKey);
-            }
-            this.updateNoTaskInfo();
-
             //show categories
             await this.showCategories();
+            //select default category
+            await this.selectCategory();
 
             //open Category creation box button
             this.element.querySelector("#newCatButton").addEventListener("click", (e) => {
@@ -100,7 +112,7 @@ ccm.files['ccm.todo.js'] = {
                 });
                 this.closeNewCatBox();
                 await this.insertCategory(await this.cat.get(newCat));
-
+                await this.selectCategory(newCat);
             });
 
             //cancel Category creation
@@ -150,9 +162,9 @@ ccm.files['ccm.todo.js'] = {
             //cancel Task creation
             const cancelTaskButton = this.element.querySelector('#cancelTaskButton');
             cancelTaskButton.addEventListener("click", () => {
-              newTaskBox.classList.add("hidden");
-              newTaskButton.disabled = false;
-              this.clearInputs();
+                newTaskBox.classList.add("hidden");
+                newTaskButton.disabled = false;
+                this.clearInputs();
             });
 
             //clear history Button
@@ -162,7 +174,6 @@ ccm.files['ccm.todo.js'] = {
                 const categoryId = categoryList.querySelector(".selected").id;
                 await this.deleteTasks(categoryId, "closed");
             });
-
         }
         /**
          * shows all categories
@@ -171,7 +182,6 @@ ccm.files['ccm.todo.js'] = {
         this.showCategories = async() => {
             const cats = await this.cat.get({ownerId: userId});
             for (const cat of cats) {
-                console.log(cat);
                 await this.insertCategory(cat);
             }
         }
@@ -187,7 +197,7 @@ ccm.files['ccm.todo.js'] = {
             if(cat.title === "default") {
                 newCat.querySelector(".catStandard").classList.remove("hidden");
                 newCat.querySelector(".catButtons").remove();
-                newCat.classList.add("selected");
+                /*newCat.classList.add("selected");*/
                 newCat.classList.add("default");
             } else {
                 //delete Category listener
@@ -202,15 +212,13 @@ ccm.files['ccm.todo.js'] = {
             //select Category listener
             newCat.addEventListener("click", (e) => this.selectCategory(e));
             this.element.querySelector("#categoryList").append(newCat);
-            await this.selectCategory(newCat);
         }
 
         this.selectCategory = async(e) => {
-            console.log("select");
+            console.trace("select");
             let target;
             if(e && e.target) {//called from click event
                 target = e.target.closest(".category");
-                console.log(target);
             } else if (e instanceof HTMLElement) {
                 target = e;
             } else { //called manually -> select first category in categorylist
@@ -230,7 +238,6 @@ ccm.files['ccm.todo.js'] = {
         this.showTasks = async(categoryKey) => {
             const categoryName = (await this.cat.get(categoryKey)).title;
             const tasks = await this.task.get({categoryId: categoryKey });
-            console.log(tasks);
             this.element.querySelector("#categoryTitle").innerHTML = categoryName; //change category name
             this.element.querySelector("#taskList").innerHTML = "";
             this.element.querySelector("#taskHistory").innerHTML = "";
@@ -246,9 +253,6 @@ ccm.files['ccm.todo.js'] = {
             }
             this.updateHistoryVisibility();
             this.updateNoTaskInfo();
-            //TODO remove
-            const ts = await this.task.get();
-            console.log(ts);
         }
         /**
          * inserts completed task into taskList div
