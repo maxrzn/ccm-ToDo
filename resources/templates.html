@@ -164,7 +164,62 @@
 
 <ccm-template key="shopStats">
     <nav id="shopStats">
-        <p>Punkteshop</p>
-        <p>Statistiken</p>
+        <p id="shopView" class="selected">Punkteshop</p>
+        <p id="statsView">Statistiken</p>
     </nav>
+</ccm-template>
+<ccm-template key="shop">
+    <div id="shop">
+        <aside id="leftShop">
+            <div class="rewardTop" id="leftShopHeader">
+                <p>Belohnungen</p>
+                <button class="primary">&#128932; Neue Belohnung</button>
+            </div>
+            <div id="newRewardBox" class="hidden">
+                <div>
+                    <p> Icon </p>
+                    <p id="iconWrapper">
+                        <span class="selected iconBox">&#9749;</span>
+                        <span class="iconBox">&#9749;</span>
+                        <span class="iconBox">&#9749;</span>
+                        <span class="iconBox">&#9749;</span>
+                        <span class="iconBox">&#9749;</span>
+                        <span class="iconBox">&#9749;</span>
+                        <span class="iconBox">&#9749;</span>
+                        <span class="iconBox">&#9749;</span>
+                    </p>
+                </div>
+                <label id="nameLabel">
+                    <span> Name </span>
+                    <input type="text" id="rewardNameInput"/>
+                </label>
+                <label id="costLabel">
+                    <span> Preis (Punkte) </span>
+                    <input type="number" id="rewardCost" value="20"/>
+                </label>
+
+                <div id="newRewardButtons">
+                    <button id="createRewardButton" class="primary">
+                        Erstellen
+                    </button>
+                    <button id="cancelRewardButton" class="secondary">
+                        Abbrechen
+                    </button>
+                </div>
+            </div>
+            <div id="rewardList"></div>
+            <div id="noRewardInfo" class="info hidden">
+                <span>Keine Belohnungen vorhanden</span>
+                <span>Erstellen Sie Ihre erste Belohnung</span>
+            </div>
+        </aside>
+        <aside id="rightShop">
+            <div class="rewardTop"><p>Belohnungsverlauf</p></div>
+            <div id="rewardHistory"></div>
+            <div id="noRewardHistoryInfo" class="info hidden">
+                <span>Noch keine Belohnungen gekauft</span>
+                <span>Kaufen Sie Ihre erste Belohnung mit verdienten Punkten</span>
+            </div>
+        </aside>
+    </div>
 </ccm-template>
