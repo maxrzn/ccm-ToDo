@@ -1,7 +1,10 @@
+
 #element {
     --blue: #2b7efd;
     --blue_hover: #2b6efd;
     --orange: #cd8901;
+
+    background-color: #efefef;
 }
 
 header {
@@ -9,8 +12,11 @@ header {
     align-items: center;
     justify-content: space-between;
     padding: 7px;
+    margin-bottom: 20px;
+
     border-bottom: gray 1px solid;
     border-radius: 12px;
+    background-color: white;
 
     & nav {
         display: flex;
@@ -28,9 +34,9 @@ header {
 }
 #main {
     width: 100%;
-    display: flex;
-    column-gap: 10px;
-    background-color: #efefef;
+    height: 100%;
+    display: grid;
+    grid-template-columns: 2fr 3fr;
 
     .div-outline{
         border : 1px solid lightgray;
@@ -39,9 +45,8 @@ header {
         background-color: white;
     }
     #categoryArea {
-        flex-basis: 40%;
-        align-items: center;
-
+        margin-left:20px;
+        margin-right:10px;
         border: 1px lightgray solid;
         border-radius: 12px;
         box-shadow: 0 0 5px #b8b8b8;
@@ -147,8 +152,9 @@ header {
     #taskArea {
         display: flex;
         flex-direction: column;
-        flex-basis: 60%;
         gap: 10px;
+        margin-right:20px;
+        margin-left:10px;
         overflow-y :auto;
 
         border: 1px lightgray solid;
@@ -177,6 +183,8 @@ header {
         border: 2px solid lightskyblue;
         border-radius: 12px;
         padding: 10px;
+        margin-left: 15px;
+        margin-right: 15px;
 
         & #newTaskInputs {
             display: flex;
