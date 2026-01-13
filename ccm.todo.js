@@ -189,7 +189,19 @@ ccm.files['ccm.todo.js'] = {
          * @returns {Promise<void>}
          */
         this.initShopStats = async() => {
-
+            const view2 = document.createElement("div");
+            view2.id = "view2";
+            this.element.querySelector("#view").appendChild(view2);
+            this.switchView2("shop");
+        }
+        this.switchView2 = (view) => {
+            if(view === "shop") {
+                this.initShop();
+            }
+        }
+        this.initShop = () => {
+            const view2 = this.element.querySelector("#view2");
+            view2.appendChild(this.ccm.helper.html(this.html.shop));
         }
         /**
          * shows all categories
