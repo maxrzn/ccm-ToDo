@@ -9,7 +9,7 @@
             <p>Hallo, %userId%!<p>
         </div>
         <nav>
-            <button id="pointsDisplay">Punkte</button>
+            <button id="pointsDisplay">%points% Punkte</button>
             <button class="primary">Shop & Statistiken</button>
             <div>Logout</div>
         </nav>
@@ -21,7 +21,7 @@
         <menu id="categoryHeader">
             <p>Kategorien</p>
             <button id="newCatButton" class="reverse">
-                 +
+                <p style="font-size: 15px">&#128932;</p>
             </button>
         </menu>
         <div id="newCatBox" class="hidden">
@@ -43,7 +43,7 @@
         <menu id="taskHeader">
             <p id="categoryTitle">Meine Aufgaben</p>
             <button id="newTaskButton" class="primary">
-                + Neue Aufgabe
+                 &#128932; Neue Aufgabe
             </button>
         </menu>
 
@@ -63,7 +63,7 @@
 
                 <label id="pointsLabel">
                     <span> Punkte (optional) </span>
-                    <input type="number" id="taskPoints" placeholder="10"/>
+                    <input type="number" id="taskPoints" placeholder="0"/>
                 </label>
             </div>
 
