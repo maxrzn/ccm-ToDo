@@ -202,6 +202,34 @@ ccm.files['ccm.todo.js'] = {
         this.initShop = () => {
             const view2 = this.element.querySelector("#view2");
             view2.appendChild(this.ccm.helper.html(this.html.shop));
+            const newRewardBox = this.element.querySelector("#newRewardBox");
+            const openRewardCreation = this.element.querySelector("#openRewardCreation");
+            //open reward creation
+            openRewardCreation.addEventListener("click", (e) => {
+                e.target.disabled = true;
+                newRewardBox.classList.remove("hidden");
+            });
+            //iconpicker eventlisteners
+            const icons = this.element.querySelectorAll(".iconBox");
+            icons.forEach((icon) => {
+               icon.addEventListener("click", (e) => {
+                   this.element.querySelector(".iconBox.selected").classList.remove("selected");
+                   e.target.classList.add("selected");
+               });
+            });
+            //cancel reward creation
+            this.element.querySelector("#cancelRewardButton").addEventListener("click",()=> {
+                newRewardBox.classList.add("hidden");
+                openRewardCreation.disabled = false;
+                this.resetNewRewardBox();
+            });
+        };
+        this.resetNewRewardBox = () => {
+            const newRewardBox = this.element.querySelector("#newRewardBox");
+            newRewardBox.querySelector(".iconBox.selected").classList.remove("selected");
+            newRewardBox.querySelector("#iconWrapper > span").classList.toggle("selected", true);
+            newRewardBox.querySelector("#rewardNameInput").value = "";
+            newRewardBox.querySelector("#rewardCost").value = 20;
         }
         /**
          * shows all categories
