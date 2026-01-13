@@ -49,6 +49,9 @@ header {
     height: 100%;
     display: grid;
     grid-template-columns: 2fr 3fr;
+    & p {
+        font-size:17px;
+    }
 
     .div-outline{
         border : 1px solid lightgray;
@@ -386,12 +389,105 @@ menu {
     display:flex;
     gap: 25px;
     border-bottom: 1px lightgray solid;
+    padding-left: 20px;
+    margin-bottom: 10px;
     & p {
         font-size: 20px;
         padding: 5px;
-        .selected {
+        &.selected {
             color: var(--blue);
+            border-bottom: solid 2px var(--blue);
         }
+        &:hover:not(.selected){
+            cursor:pointer;
+        }
+    }
+}
+#shop {
+    display:grid;
+    grid-template-columns: 50% 50%;
+
+    & .info {
+        display:flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        padding: 10%;
+        color: #959595;
+    }
+
+    & aside {
+        margin-bottom: 20px;
+        border: 1px lightgray solid;
+        border-radius: 12px;
+        box-shadow: 0 0 5px #b8b8b8;
+        background-color: white;
+        padding-top:10px;
+        padding-left: 15px;
+        padding-right: 15px;
+
+        & p {
+            font-size:17px;
+        }
+    }
+
+    & .rewardTop {
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        min-height:37px;
+    }
+    & #leftShop {
+        margin-left:20px;
+        margin-right:10px;
+
+        & #newRewardBox {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            border: 2px solid lightskyblue;
+            border-radius: 12px;
+            padding: 10px;
+            margin-top: 10px;
+
+            &#newRewardBox {
+                & #iconWrapper {
+                    display: flex;
+                    gap: 5px;
+
+                    & span {
+                        border: 2px solid lightgray;
+                        border-radius:5px;
+                        padding:5px;
+
+                        &:hover {
+                            border-color: #c5c5c5;
+                        }
+                        &.selected{
+                            border-color: var(--blue);
+                        }
+                    }
+
+                }
+
+            }
+
+            & #newRewardButtons {
+                display:flex;
+                gap: 10px;
+
+                & .primary {
+                    flex-basis: 80%;
+                }
+                & .secondary {
+                    flex-basis:20%;
+                }
+            }
+        }
+    }
+    & #rightShop {
+        margin-left:10px;
+        margin-right:20px;
     }
 }
 
