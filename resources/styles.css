@@ -451,8 +451,12 @@ menu {
             margin-top: 10px;
 
             &#newRewardBox {
+                &.hidden {
+                    display:none;
+                }
                 & #iconWrapper {
                     display: flex;
+                    flex-wrap: wrap;
                     gap: 5px;
 
                     & span {
