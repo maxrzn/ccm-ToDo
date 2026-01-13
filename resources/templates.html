@@ -5,12 +5,15 @@
 <ccm-template key="header">
     <header>
         <div>
-            <h1>To-Do Manager</h1>
-            <p>Hallo, %userId%!<p>
+            <h1>
+                <span id="leftArrow">&#129028;</span>
+                <span id="viewTitle"> To-Do Manager</span>
+            </h1>
+            <p id="greeting">Hallo, %userId%!<p>
         </div>
         <nav>
             <button id="pointsDisplay">%points% Punkte</button>
-            <button class="primary">Shop & Statistiken</button>
+            <button id="switchViewButton" class="primary">Shop & Statistiken</button>
             <div>Logout</div>
         </nav>
     </header>
@@ -157,4 +160,11 @@
             <span> %completedDate% </span>
         </p>
     </div>
+</ccm-template>
+
+<ccm-template key="shopStats">
+    <nav id="shopStats">
+        <p>Punkteshop</p>
+        <p>Statistiken</p>
+    </nav>
 </ccm-template>

@@ -63,16 +63,25 @@ ccm.files['ccm.todo.js'] = {
             this.view.id = "view";
             this.element.appendChild(this.view);
 
-            await this.switchView("tasks");
+            //shop-stats view eventlistener
+            this.element.querySelector("#switchViewButton").addEventListener("click", async()=> {await this.switchView("shopStats")});
+            //tasks view eventlistener
+            this.element.querySelector("#leftArrow").addEventListener("click",() => {this.switchView("tasks")});
 
+            await this.switchView("tasks");
         }
 
         this.switchView = async(view) => {
             if(view === "tasks") {
+                this.view.innerHTML = "";
                 this.view.appendChild(this.ccm.helper.html(this.html.main));
                 await this.initTasks();
-            } else if(view === "shop") {
-
+                this.updateHeader("tasks");
+            } else if(view === "shopStats") {
+                this.view.innerHTML = "";
+                this.view.appendChild(this.ccm.helper.html(this.html.shopStats));
+                await this.initShopStats();
+                this.updateHeader("shopStats");
             }
         }
 
@@ -174,6 +183,13 @@ ccm.files['ccm.todo.js'] = {
                 const categoryId = categoryList.querySelector(".selected").id;
                 await this.deleteTasks(categoryId, "closed");
             });
+        }
+        /**
+         * initializes shop & statistics site view
+         * @returns {Promise<void>}
+         */
+        this.initShopStats = async() => {
+
         }
         /**
          * shows all categories
@@ -352,6 +368,18 @@ ccm.files['ccm.todo.js'] = {
                 target.classList.add("selected");
             } else {
                 this.element.querySelector("#categoryList .default").classList.add("selected");
+            }
+        }
+
+        this.updateHeader = (view) => {
+            this.element.querySelector("#switchViewButton").classList.toggle("hidden", view==="shopStats");
+            this.element.querySelector("#greeting").classList.toggle("hidden", view==="shopStats");
+            this.element.querySelector("#leftArrow").classList.toggle("hidden", view==="tasks");
+            if(view === "tasks") {
+                this.element.querySelector("#viewTitle").textContent = "To-Do Manager";
+            } else if(view === "shopStats") {
+                this.element.querySelector("#viewTitle").textContent = "Shop & Statistiken";
+                document.createElement("button")
             }
         }
 
