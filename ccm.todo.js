@@ -12,26 +12,38 @@ ccm.files['ccm.todo.js'] = {
             name: "mziege2s_tasks",
             url: "https://ccm2.inf.h-brs.de"
         }],
-        userWallet: ['ccm.store', {
-            name: "mziege2s_user",
+        userInfo: ['ccm.store', {
+            name: "mziege2s_userInfo",
             url: "https://ccm2.inf.h-brs.de"
         }],
         html: ['ccm.load', '././resources/templates.html'],
         css: ['ccm.load', '././resources/styles.css']
     },
 
+    /*userReward {
+        key,
+        userId,
+        title,
+        description
+        icon,
+        cost,
+    }*/
+
 
     Instance: function () {
+
         const userId = "testuser";
         this.start = async()=> {
-            //append main areas
-            const main = this.ccm.helper.html(this.html.main);
-            this.element.innerHTML = "";
-            this.element.appendChild((this.ccm.helper.html(this.html.header, {userId: userId})));
-            this.element.appendChild(main);
-            main.appendChild(this.ccm.helper.html(this.html.catArea));
-            main.appendChild(this.ccm.helper.html(this.html.taskArea));
+            /*let data;
 
+            data = await this.cat.get();
+            for (const d of data) await this.cat.del(d.key);
+
+            data = await this.task.get();
+            for (const d of data) await this.task.del(d.key);
+
+            data = await this.userInfo.get();
+            for (const d of data) await this.userInfo.del(d.key);*/
             const userCats = await this.cat.get({ownerId: userId}); //check for existing categories
             if(!userCats.length) {
                 await this.cat.set({    //create Default category
@@ -39,13 +51,30 @@ ccm.files['ccm.todo.js'] = {
                     ownerId : userId,
                     members : []
                 });
-            } else {
+                await this.userInfo.set({  //create userInfo
+                    userId: userId,
+                    earnedPoints: 0,
+                    spentPoints: 0
+                });
+            }
+            //append main areas
+            this.element.innerHTML = "";
+
+            const main = this.ccm.helper.html(this.html.main);
+            this.element.appendChild((this.ccm.helper.html(this.html.header, {userId: userId, points:await this.getBalance(userId)})));
+            this.element.appendChild(main);
+            main.appendChild(this.ccm.helper.html(this.html.catArea));
+            main.appendChild(this.ccm.helper.html(this.html.taskArea));
+
+            if(userCats.length) {
                 const defaultCatKey = (await this.cat.get({
                     ownerId: userId,
                     title: "default"
                 }))[0].key;
                 await this.showTasks(defaultCatKey);
             }
+            this.updateNoTaskInfo();
+
             //show categories
             await this.showCategories();
 
@@ -252,6 +281,7 @@ ccm.files['ccm.todo.js'] = {
                 const taskKey = taskDiv.getAttribute("id");
                 this.task.set({key : taskKey, status : 'closed' });
                 const task = await this.task.get(taskKey);
+                await this.updatePoints(Number(task.points));
                 this.insertCompletedTask(task);
                 this.updateNoTaskInfo();
                 this.updateHistoryVisibility();
@@ -278,6 +308,20 @@ ccm.files['ccm.todo.js'] = {
             taskel.setAttribute("id", task.key);
             taskHistory.prepend(taskel);
         }
+        /**
+         * updates points in database and display
+         * @param points added amount of points
+         * @returns {Promise<void>}
+         */
+        this.updatePoints = async(points) => {
+            const entry = (await this.userInfo.get({userId: this.userId}))[0];
+            await this.userInfo.set({
+                key: entry.key,
+                earnedPoints: entry.earnedPoints + points
+            });
+
+            await this.updateBalanceDisplay();
+        }
 
         this.updateNoTaskInfo = () => {
             const noTaskInfo = this.element.querySelector("#noTaskInfo");
@@ -297,12 +341,29 @@ ccm.files['ccm.todo.js'] = {
             const catDiv = this.element.querySelector(`[id="${cat.key}"]`);
             catDiv.querySelector(".taskCount").innerHTML = taskCount + " Aufgaben";
         }
+        this.highlightCategory = (target) => {
+            const div = this.element.querySelector("#categoryList .selected");
+            if(div) {
+                div.classList.remove("selected");
+                target.classList.add("selected");
+            } else {
+                this.element.querySelector("#categoryList .default").classList.add("selected");
+            }
+        }
 
         this.clearInputs = () => {
             const input = this.element.querySelectorAll("input");
             input.forEach((i) => {
                 i.value = "";
             });
+        }
+        this.updateBalanceDisplay = async() => {
+            const balance = await this.getBalance(this.userId);
+            console.log(balance);
+            this.element.querySelector("#pointsDisplay").innerHTML = balance + " Punkte";
+        }
+        this.getBalance = async(userId) => {
+            return (await this.userInfo.get({userId:userId}))[0].earnedPoints - (await this.userInfo.get({userId:userId}))[0].spentPoints;
         }
 
         this.deleteAllCategories = async() => {
@@ -337,16 +398,7 @@ ccm.files['ccm.todo.js'] = {
                 this.updateHistoryVisibility();
             }
         }
-        this.highlightCategory = (target) => {
-            const div = this.element.querySelector("#categoryList .selected");
-            if(div) {
-                div.classList.remove("selected");
-                target.classList.add("selected");
-            } else {
-                this.element.querySelector("#categoryList .default").classList.add("selected");
-            }
 
-        }
     },
 }
 
