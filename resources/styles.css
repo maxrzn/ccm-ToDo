@@ -3,6 +3,8 @@
     --blue: #2b7efd;
     --blue_hover: #2b6efd;
     --orange: #cd8901;
+    --green: #00c853;
+    --green_hover: #00b849;
 
     background-color: #efefef;
 }
@@ -18,9 +20,12 @@ header {
 
     border-bottom: gray 1px solid;
     background-color: white;
-    .hidden {
-        display:none;
+
+    & h1 {
+        display: flex;
+        align-items: center;
     }
+
     #leftArrow{
         margin-right:5px;
     }
@@ -81,10 +86,6 @@ header {
             margin-left: 20px;
             margin-right: 20px;
             margin-bottom: 10px;
-
-            &.hidden {
-                display: none;
-            }
 
             & #newCatButtons {
                 display: flex;
@@ -151,9 +152,6 @@ header {
                 color: #2b7efd;
                 font-weight: 500;
             }
-            .hidden{
-                display:none;
-            }
 
             .catTaskCount {
                 color: #8a8a8a;
@@ -178,18 +176,12 @@ header {
         box-shadow: 0 0 5px #b8b8b8;
         background-color: white;
 
-        & #noTaskInfo.hidden {
-            display:none;
-        }
     }
     #taskHeader {
         display: flex;
         justify-content: space-between;
         align-items: center;
         gap: 10px;
-    }
-    #newTaskBox.hidden{
-        display:none;
     }
     #newTaskBox {
         display: flex;
@@ -278,21 +270,35 @@ input:focus {
 .secondary:hover {
     background-color: #e3e3e3;
 }
-
-#taskList {
+.collapse {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+.list {
     display: flex;
     flex-direction: column;
     gap: 7px;
+}
+.openItem {
+    border: 2px #dddddd solid;
+    border-radius: 12px;
+    background-color: #f7f8f9;
+    padding: 12px;
+    box-shadow: 0 0 5px #dddddd;
+}
+.closedItem {
+    border: 1px #c5ffcf solid;
+    border-radius: 12px;
+    background-color: #eefbf2;
+    padding: 12px;
+    box-shadow: 0 0 5px #b8b8b8;
+}
+
+#taskList {
     margin-left: 15px;
     margin-right: 15px;
     margin-bottom:10px;
     & > div {
-        border: 2px #dddddd solid;
-        border-radius: 12px;
-        background-color: #f7f8f9;
-        padding: 12px;
-        box-shadow: 0 0 5px #dddddd;
-
         display: flex;
         flex-direction: column;
         gap: 5px;
@@ -301,11 +307,6 @@ input:focus {
             display: flex;
             justify-content: space-between;
             align-items: center;
-
-            & .collapse {
-                min-width: 0;
-                overflow-wrap: anywhere;
-            }
 
             & .svg-wrapper {
                 display: flex;
@@ -343,9 +344,7 @@ input:focus {
     }
 
 }
-#historyArea.hidden {
-    display:none;
-}
+
 #historyArea{
     & #taskHistory {
         display: flex;
@@ -354,11 +353,6 @@ input:focus {
         margin: 7px 15px;
 
         .taskHistory-row {
-            border: 1px #c5ffcf solid;
-            border-radius: 12px;
-            background-color: #eefbf2;
-            padding: 12px;
-            box-shadow: 0 0 5px #b8b8b8;
             display: flex;
             justify-content: space-between;
             gap: 5px;
@@ -404,6 +398,9 @@ menu {
     }
 }
 #shop {
+    .rewardIcon {
+        font-size: 25px;
+    }
     display:grid;
     grid-template-columns: 50% 50%;
 
@@ -451,9 +448,6 @@ menu {
             margin-top: 10px;
 
             &#newRewardBox {
-                &.hidden {
-                    display:none;
-                }
                 & #iconWrapper {
                     display: flex;
                     flex-wrap: wrap;
@@ -494,10 +488,87 @@ menu {
         margin-right:20px;
     }
 }
+#rewardList, #rewardHistoryList {
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+.reward-row {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
 
+    & .row-start {
+    display:flex;
+    align-items:center;
+    gap:10px;
+
+    & .rewardInfo {
+        display:flex;
+        flex-direction:column;
+    }
+}
+& .row-end {
+    display:flex;
+    align-items:center;
+    gap:10px;
+
+    & .buyRewardButton {
+        border: 0;
+        border-radius: 12px;
+        padding: 10px;
+
+        &.active {
+            background-color: var(--green);
+            color: white;
+            &:hover {
+                background-color: var(--green_hover);
+            }
+        }
+        &:not(.active) {
+            background-color: #b6b6b6;
+            cursor: not-allowed;
+            color: black;
+        }
+    }
+
+    & .deleteRewardButton {
+        padding: 5px;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        border-radius: 6px;
+        &:hover {
+            background-color: lightgray;
+        }
+    }
+
+}
+}
+.rewardHistory-row {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+
+    & .row-start {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+}
+svg {
+    width:100%;
+    height:100%;
+}
 
 h1,h3,p {
     margin : 0;
+}
+.hidden {
+    display:none !important;
 }
 
 /*

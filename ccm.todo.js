@@ -16,15 +16,18 @@ ccm.files['ccm.todo.js'] = {
             name: "mziege2s_userInfo",
             url: "https://ccm2.inf.h-brs.de"
         }],
+        reward: ['ccm.store', {
+            name: "mziege2s_rewards",
+            url: "https://ccm2.inf.h-brs.de"
+        }],
         html: ['ccm.load', '././resources/templates.html'],
         css: ['ccm.load', '././resources/styles.css']
     },
 
-    /*userReward {
+    /*reward {
         key,
         userId,
         title,
-        description
         icon,
         cost,
     }*/
@@ -42,7 +45,11 @@ ccm.files['ccm.todo.js'] = {
             for (const d of data) await this.task.del(d.key);
 
             data = await this.userInfo.get();
-            for (const d of data) await this.userInfo.del(d.key);*/
+            for (const d of data) await this.userInfo.del(d.key);
+
+            data = await this.reward.get();
+            for (const d of data) await this.reward.del(d.key);*/
+
             const userCats = await this.cat.get({ownerId: userId}); //check for existing categories
             if(!userCats.length) {
                 await this.cat.set({    //create Default category
@@ -68,7 +75,7 @@ ccm.files['ccm.todo.js'] = {
             //tasks view eventlistener
             this.element.querySelector("#leftArrow").addEventListener("click",() => {this.switchView("tasks")});
 
-            await this.switchView("tasks");
+            await this.switchView("shopStats");
         }
 
         this.switchView = async(view) => {
@@ -199,16 +206,29 @@ ccm.files['ccm.todo.js'] = {
                 this.initShop();
             }
         }
-        this.initShop = () => {
+        this.initShop = async() => {
             const view2 = this.element.querySelector("#view2");
             view2.appendChild(this.ccm.helper.html(this.html.shop));
             const newRewardBox = this.element.querySelector("#newRewardBox");
             const openRewardCreation = this.element.querySelector("#openRewardCreation");
+            //clear reward history
+            this.element.querySelector("#clearRewardHistory").addEventListener("click", async() => {
+                const rewards = await this.reward.get({status: "closed"});
+                console.log(rewards);
+                for (const reward of rewards) {
+                    await this.reward.del(reward.key);
+                }
+                this.element.querySelector("#rewardHistoryList").innerHTML = "";
+                this.updateNoRewardInfo();
+            });
             //open reward creation
             openRewardCreation.addEventListener("click", (e) => {
                 e.target.disabled = true;
                 newRewardBox.classList.remove("hidden");
             });
+            //cancel reward creation
+            this.element.querySelector("#cancelRewardButton").addEventListener("click",()=> {this.resetNewRewardBox();});
+
             //iconpicker eventlisteners
             const icons = this.element.querySelectorAll(".iconBox");
             icons.forEach((icon) => {
@@ -217,20 +237,32 @@ ccm.files['ccm.todo.js'] = {
                    e.target.classList.add("selected");
                });
             });
-            //cancel reward creation
-            this.element.querySelector("#cancelRewardButton").addEventListener("click",()=> {
-                newRewardBox.classList.add("hidden");
-                openRewardCreation.disabled = false;
-                this.resetNewRewardBox();
+
+            //newRewardBox Enter eventlistener
+            newRewardBox.addEventListener("keypress", (e) => {
+                if (e.key === "Enter") {
+                    this.element.querySelector("#createRewardButton").click();
+                }
             });
+
+            //create reward
+            this.element.querySelector("#createRewardButton").addEventListener("click", async() => {
+                const rewardData = {
+                    title: this.element.querySelector("#rewardNameInput").value,
+                    icon: this.element.querySelector(".iconBox.selected").textContent,
+                    cost: this.element.querySelector("#rewardCost").value,
+                    ownerId: userId,
+                    status: "open"
+                };
+                this.reward.set(rewardData);
+                this.resetNewRewardBox();
+                this.insertOpenReward(rewardData);
+            });
+
+            //show all rewards
+            await this.showAllRewards();
         };
-        this.resetNewRewardBox = () => {
-            const newRewardBox = this.element.querySelector("#newRewardBox");
-            newRewardBox.querySelector(".iconBox.selected").classList.remove("selected");
-            newRewardBox.querySelector("#iconWrapper > span").classList.toggle("selected", true);
-            newRewardBox.querySelector("#rewardNameInput").value = "";
-            newRewardBox.querySelector("#rewardCost").value = 20;
-        }
+        
         /**
          * shows all categories
          * @returns {Promise<void>}
@@ -302,6 +334,7 @@ ccm.files['ccm.todo.js'] = {
                 tasks.forEach((task) => {
                     if(task.status==="open") {
                         this.insertOpenTask(task);
+
                     } else {
                         this.insertCompletedTask(task);
                     }
@@ -368,18 +401,105 @@ ccm.files['ccm.todo.js'] = {
             taskel.setAttribute("id", task.key);
             taskHistory.prepend(taskel);
         }
+
+        /**
+         * inserts all existing rewards into #rewardList
+         * @returns {Promise<void>}
+         */
+        this.showAllRewards = async() => {
+            const rewards = await this.reward.get({
+                ownerId: this.userId,
+            });
+            if(!rewards.length) {
+                this.updateNoRewardInfo();
+                return;
+            }
+            rewards.sort((a,b) => new Date(a.updated_at) - new Date(b.updated_at));
+            this.element.querySelector("#rewardList").innerHTML = "";
+            rewards.forEach((reward) => {
+                console.log(reward);
+                reward.status === "open" ? this.insertOpenReward(reward) : this.insertClosedReward(reward);
+            });
+
+            //delete reward eventlisteners
+            const rewardsEl = this.element.querySelectorAll(".deleteRewardButton");
+            rewardsEl.forEach((el) => {
+                el.addEventListener("click", async(e) => {
+                    const rewardEl = e.target.closest(".reward-row");
+                    await this.reward.del(rewardEl.id);
+                    rewardEl.remove();
+                });
+            });
+            //buy reward eventlisteners
+            const buyRewardsEl = this.element.querySelectorAll(".buyRewardButton");
+            buyRewardsEl.forEach((el) => {
+                el.addEventListener("click", async(e) => {
+                    const rewardEl = e.target.closest(".reward-row");
+                    await this.reward.set({key : rewardEl.id, status : 'closed' });
+                    this.insertClosedReward(await this.reward.get(rewardEl.id));
+                    rewardEl.remove();
+                    const cost = rewardEl.querySelector(".rewardCost").textContent;
+                    await this.updatePoints(Number(-cost));
+                });
+            });
+            await this.updateRewardButtons();
+        }
+        this.resetNewRewardBox = () => {
+            const newRewardBox = this.element.querySelector("#newRewardBox");
+            newRewardBox.querySelector(".iconBox.selected").classList.remove("selected");
+            newRewardBox.querySelector("#iconWrapper > span").classList.toggle("selected", true);
+            newRewardBox.querySelector("#rewardNameInput").value = "";
+            newRewardBox.querySelector("#rewardCost").value = 20;
+            this.element.querySelector("#openRewardCreation").disabled = false;
+            newRewardBox.classList.add("hidden");
+        }
+        /**
+         * inserts reward element into RewardList div
+         * @param reward element
+         */
+        this.insertOpenReward = async (reward) => {
+            const rewardList = this.element.querySelector("#rewardList");
+            const rewardEl = this.ccm.helper.html(this.html.reward, {
+                rewardIcon: reward.icon,
+                rewardTitle: reward.title,
+                rewardCost: reward.cost
+            });
+            rewardEl.id = reward.key;
+            rewardList.prepend(rewardEl);
+            this.updateNoRewardInfo();
+            await this.updateRewardButtons()
+        }
+        this.insertClosedReward = (reward) => {
+            const rewardHistoryList = this.element.querySelector("#rewardHistoryList");
+            const rewardEl = this.ccm.helper.html(this.html.closedReward, {
+                rewardIcon: reward.icon,
+                rewardTitle: reward.title,
+                rewardCost: reward.cost,
+                completedDate: new Date(reward.updated_at).toLocaleDateString("de-DE")
+            });
+            rewardHistoryList.prepend(rewardEl);
+            this.updateNoRewardInfo();
+        }
         /**
          * updates points in database and display
          * @param points added amount of points
          * @returns {Promise<void>}
          */
         this.updatePoints = async(points) => {
+            console.log(points);
             const entry = (await this.userInfo.get({userId: this.userId}))[0];
-            await this.userInfo.set({
-                key: entry.key,
-                earnedPoints: entry.earnedPoints + points
-            });
-
+            if(points>0) {
+                await this.userInfo.set({
+                    key: entry.key,
+                    earnedPoints: entry.earnedPoints + points
+                });
+            } else {
+                console.log("negative");
+                await this.userInfo.set({
+                    key: entry.key,
+                    spentPoints: entry.spentPoints - points
+                })
+            }
             await this.updateBalanceDisplay();
         }
 
@@ -387,6 +507,15 @@ ccm.files['ccm.todo.js'] = {
             const noTaskInfo = this.element.querySelector("#noTaskInfo");
             const taskList = this.element.querySelector("#taskList");
             noTaskInfo.classList.toggle("hidden", taskList.hasChildNodes());
+        }
+        this.updateNoRewardInfo = () => {
+            const noRewardInfo = this.element.querySelector("#noRewardInfo");
+            const rewardList = this.element.querySelector("#rewardList");
+            noRewardInfo.classList.toggle("hidden", rewardList.hasChildNodes());
+
+            const noRewardHistoryInfo = this.element.querySelector("#noRewardHistoryInfo");
+            const rewardHistoryList = this.element.querySelector("#rewardHistoryList");
+            noRewardHistoryInfo.classList.toggle("hidden", rewardHistoryList.hasChildNodes());
         }
 
         this.updateHistoryVisibility = () => {
@@ -433,10 +562,29 @@ ccm.files['ccm.todo.js'] = {
             const balance = await this.getBalance(this.userId);
             console.log(balance);
             this.element.querySelector("#pointsDisplay").innerHTML = balance + " Punkte";
+            await this.updateRewardButtons();
+        }
+        this.updateRewardButtons = async() => {
+            const rewardButtons = this.element.querySelectorAll(".buyRewardButton");
+            const balance = await this.getBalance(this.userId);
+            console.log(rewardButtons);
+            rewardButtons.forEach((button) => {
+                const rewardCost = button.closest(".reward-row").querySelector(".rewardCost").textContent;
+                console.log(balance + " costs" + rewardCost);
+                if(balance < Number(rewardCost)) {
+                    button.disabled = true;
+                    button.classList.toggle("active", false);
+                } else {
+                    button.disabled = false;
+                    button.classList.toggle("active", true);
+                }
+            });
         }
         this.getBalance = async(userId) => {
+            console.log(await this.userInfo.get({userId:userId}));
             return (await this.userInfo.get({userId:userId}))[0].earnedPoints - (await this.userInfo.get({userId:userId}))[0].spentPoints;
         }
+
 
         this.deleteAllCategories = async() => {
             const cats = await this.cat.get();
@@ -444,7 +592,6 @@ ccm.files['ccm.todo.js'] = {
                 this.cat.del(element.key);
                 console.log("Category: " + element.key + " wurde ausradiert!");
             });
-
         }
         /**
          * deletes category and all its tasks

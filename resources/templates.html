@@ -79,7 +79,7 @@
                 </button>
             </div>
         </div>
-        <div id="taskList"></div>
+        <div class="list" id="taskList"></div>
         <div id="noTaskInfo" class="hidden">
             <span>Keine offenen Aufgaben</span>
             <span>Erstellen Sie eine neue Aufgabe, um loszulegen</span>
@@ -140,6 +140,7 @@
 </ccm-template>
 
 <ccm-template key="task">
+    <div class="openItem">
         <div class="task-row">
             <p class="collapse">%taskContent%</p>
             <div class="svg-wrapper">
@@ -151,14 +152,50 @@
             <p>%taskPoints%</p>
             <p>%taskDeadline%</p>
         </div>
+    </div>
 </ccm-template>
 <ccm-template key="completedTask">
-    <div class="taskHistory-row">
+    <div class="taskHistory-row closedItem">
         <p class="collapse" style="text-decoration: line-through;">%completedContent%</p>
         <p class="info">
             <span class="points">%points%</span>
             <span> %completedDate% </span>
         </p>
+    </div>
+</ccm-template>
+
+<ccm-template key="reward">
+    <div class="reward-row openItem">
+        <div class="row-start">
+            <p class="rewardIcon">%rewardIcon%</p>
+            <div class="rewardInfo">
+                <p class="collapse">%rewardTitle%</p>
+                <p style="color:#FFA500"><span class="rewardCost"> %rewardCost% </span> Punkte</p>
+            </div>
+        </div>
+        <div class="row-end">
+            <button class="buyRewardButton"> Kaufen </button>
+            <div class="deleteRewardButton">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#FF0006" viewBox="0 0 16 16">
+                    <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+</ccm-template>
+
+<ccm-template key="closedReward">
+    <div class="rewardHistory-row closedItem">
+        <div class="row-start">
+            <p class="rewardIcon">%rewardIcon%</p>
+            <div class="rewardInfo">
+                <p class="collapse">%rewardTitle%</p>
+                <p><span class="rewardCost"> %rewardCost% </span> Punkte</p>
+            </div>
+        </div>
+        <div class="row-end">
+            <p>%completedDate%</p>
+        </div>
     </div>
 </ccm-template>
 
@@ -179,21 +216,20 @@
                 <div>
                     <p> Icon </p>
                     <p id="iconWrapper">
-                        <span class="selected iconBox">&#9749;</span>
-                        <span class="iconBox">&#9749;</span>
-                        <span class="iconBox">&#9749;</span>
-                        <span class="iconBox">&#9749;</span>
-                        <span class="iconBox">&#9749;</span>
-                        <span class="iconBox">&#9749;</span>
-                        <span class="iconBox">&#9749;</span>
-                        <span class="iconBox">&#9749;</span>
-                        <span class="iconBox">&#9749;</span>
-                        <span class="iconBox">&#9749;</span>
+                        <span id="icon-1" class="selected iconBox">&#9749;</span>
+                        <span id="icon-2" class="iconBox">&#127873;</span>
+                        <span id="icon-3" class="iconBox">&#9749;</span>
+                        <span id="icon-4" class="iconBox">&#9749;</span>
+                        <span id="icon-5" class="iconBox">&#9749;</span>
+                        <span id="icon-6" class="iconBox">&#9749;</span>
+                        <span id="icon-7" class="iconBox">&#9749;</span>
+                        <span id="icon-8" class="iconBox">&#9749;</span>
+                        <span id="icon-9" class="iconBox">&#9749;</span>
                     </p>
                 </div>
                 <label id="nameLabel">
                     <span> Name </span>
-                    <input type="text" id="rewardNameInput"/>
+                    <input type="text" id="rewardNameInput" placeholder="z.B. Kaffepause"/>
                 </label>
                 <label id="costLabel">
                     <span> Preis (Punkte) </span>
@@ -209,15 +245,18 @@
                     </button>
                 </div>
             </div>
-            <div id="rewardList"></div>
+            <div class="list" id="rewardList"></div>
             <div id="noRewardInfo" class="info hidden">
                 <span>Keine Belohnungen vorhanden</span>
                 <span>Erstellen Sie Ihre erste Belohnung</span>
             </div>
         </aside>
         <aside id="rightShop">
-            <div class="rewardTop"><p>Belohnungsverlauf</p></div>
-            <div id="rewardHistory"></div>
+            <div class="rewardTop">
+                <p>Belohnungsverlauf</p>
+                <button id="clearRewardHistory" class="secondary">Verlauf löschen</button>
+            </div>
+            <div id="rewardHistoryList" class="list"></div>
             <div id="noRewardHistoryInfo" class="info hidden">
                 <span>Noch keine Belohnungen gekauft</span>
                 <span>Kaufen Sie Ihre erste Belohnung mit verdienten Punkten</span>
