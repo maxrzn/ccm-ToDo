@@ -121,6 +121,7 @@ header {
 
                 &.selected {
                     border-color: var(--blue);
+                    background-color: #e6f7ff;
                 }
             }
 
@@ -160,6 +161,16 @@ header {
             .catButtons {
                 display: flex;
                 gap: 8px;
+                & svg {
+                    width: 20px;
+                    height: 20px;
+                    border-radius: 6px;
+                    padding: 5px;
+
+                }
+                & svg:hover {
+                    background-color: lightgray;
+                }
             }
         }
     }
@@ -303,36 +314,47 @@ input:focus {
         flex-direction: column;
         gap: 5px;
 
-        & .task-row {
+
+        & .task-row, .info {
             display: flex;
             justify-content: space-between;
             align-items: center;
 
+            & .info {
+                gap:10px;
+
+                & .taskPoints {
+                    color: var(--orange);
+                }
+            }
+
             & .svg-wrapper {
                 display: flex;
                 gap: 5px;
+                align-items: center;
 
                 & .icon-box-bin, & .icon-box-checkmark {
-                    width: 32px;
-                    height: 32px;
+                    width: 20px;
+                    height: 20px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     border-radius: 6px;
+                    padding:5px;
                 }
 
                 & .icon-box-checkmark {
-                    background-color: green;
+                    background-color: var(--green);
+                    &:hover {
+                        background-color: var(--green_hover);
+                    }
                 }
 
                 & .icon-box-bin {
-                    background-color: gray;
-                }
-
-                & .icon-box-bin svg, & .icon-box-checkmark svg {
-                    width: 18px;
-                    height: 18px;
-                    display: block;
+                    background-color: red;
+                    &:hover {
+                        background-color: #ff6666;
+                    }
                 }
             }
         }
