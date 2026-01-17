@@ -75,7 +75,7 @@ ccm.files['ccm.todo.js'] = {
             //tasks view eventlistener
             this.element.querySelector("#leftArrow").addEventListener("click",() => {this.switchView("tasks")});
 
-            await this.switchView("shopStats");
+            await this.switchView("tasks");
         }
 
         this.switchView = async(view) => {
@@ -355,6 +355,11 @@ ccm.files['ccm.todo.js'] = {
                 taskPoints: task.points ?? "",
                 taskDeadline: taskDeadline
             });
+            //remove icons if not needed
+            console.log(task.points + task.deadline);
+            if(!task.points)  {taskel.querySelector(".taskPoints").remove();}
+            if(!task.deadline) {taskel.querySelector(".taskDeadline").remove();}
+
             taskel.setAttribute("id", task.key);
             //deleteTask Button
             taskel.querySelector(".deleteTaskButton").addEventListener("click", async (e) => {
