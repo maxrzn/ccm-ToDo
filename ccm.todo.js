@@ -10,11 +10,11 @@ ccm.files['ccm.todo.js'] = {
         ],
         cat: ['ccm.store', {
             name: "mziege2s_categories",
-            url: "https://ccm2.inf.h-brs.de"
+            url: "wss://ccm2.inf.h-brs.de"
         }],
         task: ['ccm.store', {
             name: "mziege2s_tasks",
-            url: "https://ccm2.inf.h-brs.de"
+            url: "wss://ccm2.inf.h-brs.de"
         }],
         userInfo: ['ccm.store', {
             name: "mziege2s_userInfo",
@@ -36,6 +36,9 @@ ccm.files['ccm.todo.js'] = {
         this.start = async()=> {
             await this.user.login();
             const userId = this.user.getUsername();
+            this.task.onchange = async(dataset) => {
+                console.log(dataset);
+            };
             /*let data;
 
             data = await this.cat.get();
@@ -84,6 +87,14 @@ ccm.files['ccm.todo.js'] = {
         this.switchView = async(view) => {
             if(view === "tasks") {
                 this.view.innerHTML = "";
+                this.view.appendChild(this.ccm.helper.html(this.html.editMember, {userId: this.user.getUsername(), firstLetter: this.user.getUsername().charAt(0).toUpperCase()}))
+
+                //svgs hinzufuegen.. workaround da sonst das html nicht richtig angezeigt wird
+                const popupEl = this.element.querySelector("#popupEditMember");
+                popupEl.querySelector(".addMemberButton").appendChild(this.ccm.helper.html(this.html.addMemberSVG));
+                popupEl.querySelector("#closePopup").appendChild(this.ccm.helper.html(this.html.xSVG));
+                popupEl.querySelector(".deleteMember").appendChild(this.ccm.helper.html(this.html.xSVG));
+
                 this.view.appendChild(this.ccm.helper.html(this.html.main));
                 await this.initTasks();
                 this.updateHeader("tasks");
@@ -292,6 +303,12 @@ ccm.files['ccm.todo.js'] = {
                 /*newCat.classList.add("selected");*/
                 newCat.classList.add("default");
             } else {
+                //members button listener
+                newCat.querySelector(".group").addEventListener("click", async(e) => {
+                    const categoryEl = e.target.closest("div[id]");
+                    this.element.querySelector("#overlay").classList.toggle("hidden", false);
+                    console.log(categoryEl.id);
+                })
                 //delete Category listener
                 newCat.querySelector(".delete").addEventListener("click", async(e) => {
                     console.log("trash");
@@ -360,7 +377,6 @@ ccm.files['ccm.todo.js'] = {
                 taskDeadline: taskDeadline
             });
             //remove icons if not needed
-            console.log(task.points + task.deadline);
             if(!task.points)  {taskel.querySelector(".taskPoints").remove();}
             if(!task.deadline) {taskel.querySelector(".taskDeadline").remove();}
 

@@ -146,6 +146,48 @@
     </div>
 </ccm-template>
 
+<ccm-template key="editMember">
+    <div id="overlay" class="">
+        <div id="popupEditMember">
+            <div class="top-row">
+                <p>Mitglieder verwalten</p>
+                <div id="closePopup"></div>
+            </div>
+            <div class="mid-row">
+                <span>Mitglied hinzufügen</span>
+                <div class="input-wrapper">
+                    <input type="text" class="searchMember" placeholder="Benutzername">
+                    <button class="primary addMemberButton">
+
+                    </button>
+                </div>
+            </div>
+            <p>Aktuelle Mitglieder</p>
+            <div id="memberList">
+                <div class="member">
+                    <div class="memberInfo">
+                        <p class="memberIcon"> %firstLetter% </p>
+                        <p class="memberName">%userId%</p>
+                        <p class="tag">Eigentümer</p>
+                    </div>
+                    <div class="deleteMember"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</ccm-template>
+
+<ccm-template key="member">
+    <div class="member">
+        <div class="memberInfo">
+            <p class="memberIcon"> %firstLetter% </p>
+            <p class="memberName">%userId%</p>
+            <p class="tag">Eigentümer</p>
+        </div>
+        <div class="deleteMember">x</div>
+    </div>
+</ccm-template>
+
 <ccm-template key="task">
     <div class="openItem">
         <div class="task-row">
@@ -174,7 +216,7 @@
         <p class="collapse" style="text-decoration: line-through;">%completedContent%</p>
         <p class="info">
             <span class="points">%points%</span>
-            <span> %completedDate% </span>
+            <span> &#128197; %completedDate% </span>
         </p>
     </div>
 </ccm-template>
@@ -278,4 +320,16 @@
             </div>
         </aside>
     </div>
+</ccm-template>
+
+<ccm-template key="addMemberSVG">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-add" viewBox="0 0 16 16">
+        <path d="M12.5 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7m.5-5v1h1a.5.5 0 0 1 0 1h-1v1a.5.5 0 0 1-1 0v-1h-1a.5.5 0 0 1 0-1h1v-1a.5.5 0 0 1 1 0m-2-6a3 3 0 1 1-6 0 3 3 0 0 1 6 0M8 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4"/>
+        <path d="M8.256 14a4.5 4.5 0 0 1-.229-1.004H3c.001-.246.154-.986.832-1.664C4.484 10.68 5.711 10 8 10q.39 0 .74.025c.226-.341.496-.65.804-.918Q8.844 9.002 8 9c-5 0-6 3-6 4s1 1 1 1z"/>
+    </svg>
+</ccm-template>
+<ccm-template key="xSVG">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+        <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+    </svg>
 </ccm-template>

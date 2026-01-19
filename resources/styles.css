@@ -249,6 +249,105 @@ header {
         color: #959595;
     }
 }
+svg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(97, 97, 97, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    border-color:black;
+
+    & #popupEditMember {
+        background-color: white;
+        border-radius: 12px;
+        padding: 20px;
+        min-width: 300px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        flex-wrap: wrap;
+
+        & .top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+
+            & #closePopup {
+                padding: 5px;
+                border-radius: 6px;
+                &:hover {
+                    background-color: lightgray;
+                }
+            }
+        }
+        & .input-wrapper {
+            display: flex;
+            gap: 10px;
+            & input {
+                flex-basis: 85%;
+            }
+            & button {
+                flex-basis: 15%;
+            }
+        }
+        & #memberList {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            & .member {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 10px;
+
+                & .deleteMember {
+                    color:red;
+                    border-radius: 4px;
+                    padding: 2px;
+                    &:hover {
+                        background-color: #ffcfcf;
+                    }
+                }
+
+                & .memberInfo {
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    gap: 7px;
+
+                    & .memberIcon {
+                        width: 20px;
+                        height: 20px;
+                        border-radius: 10px;
+                        background-color: var(--blue);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        color: white;
+                        padding: 2px;
+                    }
+                    & .memberName {
+                        font-weight: bold;
+                    }
+                    & .tag {
+                        padding: 2px 4px;
+                        border-radius: 999px;
+                        background-color: #ffeccf;
+                        color: #ffb00b;
+                    }
+                }
+            }
+        }
+    }
+}
 label {
     display: flex;
     flex-direction: column;
