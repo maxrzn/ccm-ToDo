@@ -284,7 +284,7 @@ ccm.files['ccm.todo.js'] = {
          * @returns {Promise<void>}
          */
         this.insertCategory = async(cat) => {
-            const taskCount = (await this.task.get({ownerId: this.user.getUsername(), categoryId : cat.key, status:"open"})).length;
+            const taskCount = (await this.task.get({userId: this.user.getUsername(), categoryId : cat.key, status:"open"})).length;
             const newCat = this.ccm.helper.html(this.html.category, {categoryKey:cat.key ,title:cat.title, taskCount:taskCount });
             if(cat.title === "default") {
                 newCat.querySelector(".catStandard").classList.remove("hidden");
@@ -535,7 +535,7 @@ ccm.files['ccm.todo.js'] = {
         }
         this.updateTaskCount = async (catId) => {
             const cat = await this.cat.get(catId);
-            const taskCount = (await this.task.get({ownerId: this.user.getUsername(), categoryId : cat.key, status:"open"})).length;
+            const taskCount = (await this.task.get({userId: this.user.getUsername(), categoryId : cat.key, status:"open"})).length;
             const catDiv = this.element.querySelector(`[id="${cat.key}"]`);
             catDiv.querySelector(".taskCount").innerHTML = taskCount + " Aufgaben";
         }
