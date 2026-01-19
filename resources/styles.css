@@ -47,6 +47,18 @@ header {
             border-radius: 12px;
             padding: 10px;
         }
+        & #logout {
+            padding: 5px;
+            border-radius: 6px;
+            &:hover {
+                background-color: lightgray;
+            }
+            & svg {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+        }
     }
 }
 #main {

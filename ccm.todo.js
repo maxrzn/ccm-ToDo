@@ -4,6 +4,10 @@ ccm.files['ccm.todo.js'] = {
     name: 'todo',
     ccm: '././libs/ccm/ccm.js',
     config: {
+        user : [
+            "ccm.start",
+            "https://ccmjs.github.io/akless-components/user/versions/ccm.user-9.7.0.js",
+        ],
         cat: ['ccm.store', {
             name: "mziege2s_categories",
             url: "https://ccm2.inf.h-brs.de"
@@ -24,18 +28,13 @@ ccm.files['ccm.todo.js'] = {
         css: ['ccm.load', '././resources/styles.css']
     },
 
-    /*reward {
-        key,
-        userId,
-        title,
-        icon,
-        cost,
-    }*/
-
-
     Instance: function () {
+        this.init = async () => {
+            this.user.onchange = this.start;
+        }
         const userId = "testuser";
         this.start = async()=> {
+            await this.user.login();
             /*let data;
 
             data = await this.cat.get();
@@ -63,6 +62,7 @@ ccm.files['ccm.todo.js'] = {
                     spentPoints: 0
                 });
             }
+
             //append header and view div
             this.element.innerHTML = "";
             this.element.appendChild((this.ccm.helper.html(this.html.header, {userId: userId, points:await this.getBalance(userId)})));
@@ -70,6 +70,8 @@ ccm.files['ccm.todo.js'] = {
             this.view.id = "view";
             this.element.appendChild(this.view);
 
+            //logout click listener
+            this.element.querySelector("#logout").addEventListener("click", ()=>{this.user.logout()})
             //shop-stats view eventlistener
             this.element.querySelector("#switchViewButton").addEventListener("click", async()=> {await this.switchView("shopStats")});
             //tasks view eventlistener
