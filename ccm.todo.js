@@ -32,9 +32,10 @@ ccm.files['ccm.todo.js'] = {
         this.init = async () => {
             this.user.onchange = this.start;
         }
-        const userId = "testuser";
+
         this.start = async()=> {
             await this.user.login();
+            const userId = this.user.getUsername();
             /*let data;
 
             data = await this.cat.get();
@@ -102,6 +103,7 @@ ccm.files['ccm.todo.js'] = {
             const main = this.element.querySelector("#main");
             main.appendChild(this.ccm.helper.html(this.html.catArea));
             main.appendChild(this.ccm.helper.html(this.html.taskArea));
+            const userId = this.user.getUsername();
 
             //show categories
             await this.showCategories();
@@ -253,7 +255,7 @@ ccm.files['ccm.todo.js'] = {
                     title: this.element.querySelector("#rewardNameInput").value,
                     icon: this.element.querySelector(".iconBox.selected").textContent,
                     cost: this.element.querySelector("#rewardCost").value,
-                    ownerId: userId,
+                    ownerId: this.user.getUsername(),
                     status: "open"
                 };
                 this.reward.set(rewardData);
@@ -270,7 +272,7 @@ ccm.files['ccm.todo.js'] = {
          * @returns {Promise<void>}
          */
         this.showCategories = async() => {
-            const cats = await this.cat.get({ownerId: userId});
+            const cats = await this.cat.get({ownerId: this.user.getUsername()});
             for (const cat of cats) {
                 await this.insertCategory(cat);
             }
@@ -282,7 +284,7 @@ ccm.files['ccm.todo.js'] = {
          * @returns {Promise<void>}
          */
         this.insertCategory = async(cat) => {
-            const taskCount = (await this.task.get({ownerId: this.userId, categoryId : cat.key, status:"open"})).length;
+            const taskCount = (await this.task.get({ownerId: this.user.getUsername(), categoryId : cat.key, status:"open"})).length;
             const newCat = this.ccm.helper.html(this.html.category, {categoryKey:cat.key ,title:cat.title, taskCount:taskCount });
             if(cat.title === "default") {
                 newCat.querySelector(".catStandard").classList.remove("hidden");
@@ -415,7 +417,7 @@ ccm.files['ccm.todo.js'] = {
          */
         this.showAllRewards = async() => {
             const rewards = await this.reward.get({
-                ownerId: this.userId,
+                ownerId: this.user.getUsername(),
             });
             if(!rewards.length) {
                 this.updateNoRewardInfo();
@@ -494,7 +496,7 @@ ccm.files['ccm.todo.js'] = {
          */
         this.updatePoints = async(points) => {
             console.log(points);
-            const entry = (await this.userInfo.get({userId: this.userId}))[0];
+            const entry = (await this.userInfo.get({userId: this.user.getUsername()}))[0];
             if(points>0) {
                 await this.userInfo.set({
                     key: entry.key,
@@ -533,7 +535,7 @@ ccm.files['ccm.todo.js'] = {
         }
         this.updateTaskCount = async (catId) => {
             const cat = await this.cat.get(catId);
-            const taskCount = (await this.task.get({ownerId: this.userId, categoryId : cat.key, status:"open"})).length;
+            const taskCount = (await this.task.get({ownerId: this.user.getUsername(), categoryId : cat.key, status:"open"})).length;
             const catDiv = this.element.querySelector(`[id="${cat.key}"]`);
             catDiv.querySelector(".taskCount").innerHTML = taskCount + " Aufgaben";
         }
@@ -566,14 +568,14 @@ ccm.files['ccm.todo.js'] = {
             });
         }
         this.updateBalanceDisplay = async() => {
-            const balance = await this.getBalance(this.userId);
+            const balance = await this.getBalance(this.user.getUsername());
             console.log(balance);
             this.element.querySelector("#pointsDisplay").innerHTML = balance + " Punkte";
             await this.updateRewardButtons();
         }
         this.updateRewardButtons = async() => {
             const rewardButtons = this.element.querySelectorAll(".buyRewardButton");
-            const balance = await this.getBalance(this.userId);
+            const balance = await this.getBalance(this.user.getUsername());
             console.log(rewardButtons);
             rewardButtons.forEach((button) => {
                 const rewardCost = button.closest(".reward-row").querySelector(".rewardCost").textContent;
@@ -588,7 +590,6 @@ ccm.files['ccm.todo.js'] = {
             });
         }
         this.getBalance = async(userId) => {
-            console.log(await this.userInfo.get({userId:userId}));
             return (await this.userInfo.get({userId:userId}))[0].earnedPoints - (await this.userInfo.get({userId:userId}))[0].spentPoints;
         }
 
@@ -610,7 +611,7 @@ ccm.files['ccm.todo.js'] = {
             await this.deleteTasks(categoryId, "");
         }
         this.deleteTasks = async(categoryId, status) => {
-            const query = {ownerId:this.userId, categoryId:categoryId};
+            const query = {ownerId:this.user.getUsername(), categoryId:categoryId};
             if(status !== "") {query.status = status;}
             const tasks = await this.task.get(query);
             console.log("tasks" + tasks);
