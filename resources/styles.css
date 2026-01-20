@@ -53,6 +53,8 @@ header {
 
             & #coinSVG {
                 color: var(--orange);
+                width: 15px;
+                height: 15px;
             }
 
         }
@@ -445,6 +447,10 @@ input:focus {
                 align-items: center;
                 gap:10px;
                 margin-top:5px;
+                & svg {
+                    width: 15px;
+                    height: 15px;
+                }
 
                 p {
                     display: flex;
@@ -454,6 +460,7 @@ input:focus {
 
                 & .taskPoints {
                     color: var(--orange);
+
                 }
             }
 
