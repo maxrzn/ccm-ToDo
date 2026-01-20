@@ -34,19 +34,58 @@ ccm.files['ccm.todo.js'] = {
         }
 
         this.start = async()=> {
+            console.log("start");
             await this.user.login();
             const userId = this.user.getUsername();
 
             //listen on cat dataset
             this.cat.onchange = async(dataset) => {
                 console.log(dataset);
+                const list = this.element.querySelector("#categoryList");
+                //DELETE
+                if(typeof dataset === "string") {   //delete event returns key as string
+                    const catEl = this.element.querySelector(`#categoryList [id="${dataset}"]`);
+                    if(catEl) {
+                        catEl.remove();
+                    } else {return;}
+                    if(catEl.classList.contains("selected")) {  //category was selected
+                        list.firstElementChild.classList.toggle("selected", true)   //select default
+                    }
+                    return;
+                }
+                //check if Change is relevant
                 const isMember = dataset.members.some(m => m === userId);
                 const isOwner = dataset.ownerId === userId;
                 console.log("member: " + isMember + " owner: " + isOwner);
-                if(!isMember && !isOwner) return;   //return if change is irrelevant
+                const catEl = list.querySelector(`[id="${dataset.key}"]`)
 
-
+                if(!isMember && !isOwner) { //no member or owner
+                    //remove
+                    if (catEl) {    //category exists in UI  --> remove
+                        if(catEl.classList.contains("selected")) {
+                            await this.selectCategory();
+                        }
+                        catEl.remove();
+                    }
+                    return; //return if no member or owner
+                }
+                //update member list
+                if(catEl) { //category exists
+                    //category group management open
+                    if(!(this.element.querySelector("#overlay").classList.contains("hidden")) && catEl.classList.contains("selected")) {
+                        await this.showMembers(dataset);
+                    }
+                } else {    //newly added
+                    await this.insertCategory(dataset);
+                    await this.updateTaskCount(dataset.key);
+                    list.querySelector(".selected").click();    //reselect category
+                }
             };
+
+            //listen on task dataset
+            this.task.onchange = async(dataset) => {
+                //TODO
+            }
             /*let data;
 
             data = await this.cat.get();
@@ -93,6 +132,7 @@ ccm.files['ccm.todo.js'] = {
         }
 
         this.switchView = async(view) => {
+            console.log("switch view");
             if(view === "tasks") {
                 this.view.innerHTML = "";
                 this.view.appendChild(this.ccm.helper.html(this.html.editMember, {userId: this.user.getUsername(), firstLetter: this.user.getUsername().charAt(0).toUpperCase()}))
@@ -118,6 +158,7 @@ ccm.files['ccm.todo.js'] = {
          * @returns {Promise<void>}
          */
         this.initTasks = async() =>{
+            console.log("init tasks");
             const main = this.element.querySelector("#main");
             main.appendChild(this.ccm.helper.html(this.html.catArea));
             main.appendChild(this.ccm.helper.html(this.html.taskArea));
@@ -125,8 +166,6 @@ ccm.files['ccm.todo.js'] = {
 
             //show categories
             await this.showCategories();
-            //select default category
-            await this.selectCategory();
 
             //open Category creation box button
             this.element.querySelector("#newCatButton").addEventListener("click", (e) => {
@@ -323,6 +362,7 @@ ccm.files['ccm.todo.js'] = {
          * @returns {Promise<void>}
          */
         this.showCategories = async() => {
+            console.log("show categories");
             const userId = this.user.getUsername();
             const cats = await this.cat.get({
                 $or: [
@@ -330,9 +370,12 @@ ccm.files['ccm.todo.js'] = {
                     {members: userId}
                 ]
             });
+            this.element.querySelector("#categoryList").innerHTML = "";
             for (const cat of cats) {
                 await this.insertCategory(cat);
             }
+            //select default category
+            await this.selectCategory();
         }
 
         /**
@@ -341,7 +384,7 @@ ccm.files['ccm.todo.js'] = {
          * @returns {Promise<void>}
          */
         this.insertCategory = async(cat) => {
-            const taskCount = (await this.task.get({userId: this.user.getUsername(), categoryId : cat.key, status:"open"})).length;
+            const taskCount = (await this.task.get({categoryId : cat.key, status:"open"})).length;
             const newCat = this.ccm.helper.html(this.html.category, {categoryKey:cat.key ,title:cat.title, taskCount:taskCount });
             if(cat.title === "Meine Aufgaben") {
                 newCat.querySelector(".catStandard").classList.remove("hidden");
@@ -352,7 +395,9 @@ ccm.files['ccm.todo.js'] = {
                 //members button listener
                 newCat.querySelector(".group").addEventListener("click", async(e) => {
                     const categoryEl = e.target.closest("div[id]");
-                    this.element.querySelector("#overlay").classList.toggle("hidden", false);
+                    const overlay = this.element.querySelector("#overlay");
+                    overlay.classList.toggle("hidden", false);
+                    overlay.querySelector(".searchMember").focus();
                     console.log(categoryEl.id);
                     await this.showMembers(await this.cat.get(categoryEl.id));
                 })
@@ -397,6 +442,7 @@ ccm.files['ccm.todo.js'] = {
             this.element.querySelector("#newTaskButton").disabled = false; //enable button
             this.highlightCategory(target);
             await this.showTasks(target.id);
+            this.clearInputs();
         }
 
         this.showMembers = async(cat) => {
@@ -455,7 +501,6 @@ ccm.files['ccm.todo.js'] = {
                 tasks.forEach((task) => {
                     if(task.status==="open") {
                         this.insertOpenTask(task);
-
                     } else {
                         this.insertCompletedTask(task);
                     }
@@ -661,9 +706,11 @@ ccm.files['ccm.todo.js'] = {
         }
         this.updateTaskCount = async (catId) => {
             const cat = await this.cat.get(catId);
-            const taskCount = (await this.task.get({userId: this.user.getUsername(), categoryId : cat.key, status:"open"})).length;
+            const tasks = await this.task.get({categoryId: catId, status:"open"});
+            const taskCount = tasks.length;
             const catDiv = this.element.querySelector(`[id="${cat.key}"]`);
             catDiv.querySelector(".taskCount").innerHTML = taskCount + " Aufgaben";
+            console.log("taskcount: " + taskCount);
         }
         this.highlightCategory = (target) => {
             const div = this.element.querySelector("#categoryList .selected");
