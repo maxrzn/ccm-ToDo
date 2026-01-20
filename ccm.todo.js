@@ -36,8 +36,15 @@ ccm.files['ccm.todo.js'] = {
         this.start = async()=> {
             await this.user.login();
             const userId = this.user.getUsername();
-            this.task.onchange = async(dataset) => {
+
+            //listen on cat dataset
+            this.cat.onchange = async(dataset) => {
                 console.log(dataset);
+                const isMember = dataset.members.some(m => m === userId);
+                const isOwner = dataset.ownerId === userId;
+                console.log("member: " + isMember + " owner: " + isOwner);
+                if(!isMember && !isOwner) return;   //return if change is irrelevant
+
             };
             /*let data;
 
@@ -323,7 +330,6 @@ ccm.files['ccm.todo.js'] = {
                     {members: userId}
                 ]
             });
-            console.log(cats);
             for (const cat of cats) {
                 await this.insertCategory(cat);
             }
@@ -361,7 +367,19 @@ ccm.files['ccm.todo.js'] = {
             }
             //select Category listener
             newCat.addEventListener("click", (e) => this.selectCategory(e));
-            this.element.querySelector("#categoryList").append(newCat);
+            const categoryList = this.element.querySelector("#categoryList");
+            if(cat.title === "default") {   //insert default as first element
+                categoryList.prepend(newCat);
+            } else {                        //insert after default child
+                const first = categoryList.firstChild;
+                if(first && first.nextSibling) {
+                    categoryList.insertBefore(newCat, first.nextSibling);
+                } else {
+                    categoryList.appendChild(newCat);
+                }
+            }
+
+
         }
 
         this.selectCategory = async(e) => {
@@ -383,9 +401,9 @@ ccm.files['ccm.todo.js'] = {
 
         this.showMembers = async(cat) => {
             this.element.querySelector("#memberList").innerHTML = "";
-            //insert self
-            this.insertMember(cat.ownerId, this.user.getUsername());
-            console.log(cat);
+            //insert owner
+            this.insertMember(cat.ownerId, cat.ownerId);
+            console.log(cat.members);
             //insert members
             if(cat.members.length > 0) {
                 cat.members.forEach((username) => {this.insertMember(cat.ownerId, username);});
@@ -405,6 +423,8 @@ ccm.files['ccm.todo.js'] = {
                 tag.classList.add("tag");
                 tag.textContent = "Eigentümer";
                 memberEl.querySelector(".memberInfo").appendChild(tag);
+            } else if (ownerId !== this.user.getUsername()) {  //remove delete member buttons if youre not the owner
+                memberEl.querySelector(".deleteMember").classList.add("hidden");
             } else {
                 memberEl.querySelector(".deleteMember").addEventListener("click", async(e) => {
                     const catKey = this.element.querySelector("#categoryList .selected").id;
@@ -412,6 +432,7 @@ ccm.files['ccm.todo.js'] = {
                     const memberName = memberEl.querySelector(".memberName").textContent;
                     const cat = await this.cat.get(catKey);
                     const updatedMembers = cat.members.filter(member => member !== memberName);
+                    console.log(updatedMembers);
                     await this.cat.set({key: catKey, members: updatedMembers});
                     memberEl.remove();
                 });
