@@ -45,6 +45,7 @@ ccm.files['ccm.todo.js'] = {
                 console.log("member: " + isMember + " owner: " + isOwner);
                 if(!isMember && !isOwner) return;   //return if change is irrelevant
 
+
             };
             /*let data;
 
@@ -60,10 +61,10 @@ ccm.files['ccm.todo.js'] = {
             data = await this.reward.get();
             for (const d of data) await this.reward.del(d.key);*/
 
-            const userCats = await this.cat.get({ownerId: userId}); //check for existing categories
-            if(!userCats.length) {
+            const userExists = await this.userInfo.get({userId:userId}); //check for existing categories
+            if(userExists.length === 0) {
                 await this.cat.set({    //create Default category
-                    title: "default",
+                    title: "Meine Aufgaben",
                     ownerId : userId,
                     members : []
                 });
@@ -73,7 +74,6 @@ ccm.files['ccm.todo.js'] = {
                     spentPoints: 0
                 });
             }
-
             //append header and view div
             this.element.innerHTML = "";
             this.element.appendChild((this.ccm.helper.html(this.html.header, {userId: userId, points:await this.getBalance(userId)})));
@@ -143,7 +143,7 @@ ccm.files['ccm.todo.js'] = {
             //create Category
             this.element.querySelector("#createCat").addEventListener("click", async () => {
                 const title = this.element.querySelector("#catTitle").value;
-                const newCat = await this.cat.set({    //create Default category
+                const newCat = await this.cat.set({    //create category
                     title: title,
                     ownerId : userId,
                     members : []
@@ -343,7 +343,7 @@ ccm.files['ccm.todo.js'] = {
         this.insertCategory = async(cat) => {
             const taskCount = (await this.task.get({userId: this.user.getUsername(), categoryId : cat.key, status:"open"})).length;
             const newCat = this.ccm.helper.html(this.html.category, {categoryKey:cat.key ,title:cat.title, taskCount:taskCount });
-            if(cat.title === "default") {
+            if(cat.title === "Meine Aufgaben") {
                 newCat.querySelector(".catStandard").classList.remove("hidden");
                 newCat.querySelector(".catButtons").remove();
                 /*newCat.classList.add("selected");*/
@@ -368,7 +368,7 @@ ccm.files['ccm.todo.js'] = {
             //select Category listener
             newCat.addEventListener("click", (e) => this.selectCategory(e));
             const categoryList = this.element.querySelector("#categoryList");
-            if(cat.title === "default") {   //insert default as first element
+            if(cat.title === "Meine Aufgaben") {   //insert default as first element
                 categoryList.prepend(newCat);
             } else {                        //insert after default child
                 const first = categoryList.firstChild;
