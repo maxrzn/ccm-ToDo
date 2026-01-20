@@ -426,13 +426,16 @@ input:focus {
         gap: 5px;
 
 
-        & .task-row, .info {
+        & .task-row {
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
 
             & .info {
+                display: flex;
+                align-items: center;
                 gap:10px;
+                margin-top:5px;
 
                 & .taskPoints {
                     color: var(--orange);
