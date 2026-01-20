@@ -70,6 +70,7 @@ ccm.files['ccm.todo.js'] = {
             //append header and view div
             this.element.innerHTML = "";
             this.element.appendChild((this.ccm.helper.html(this.html.header, {userId: userId, points:await this.getBalance(userId)})));
+            this.element.querySelector("#coinSVG").appendChild(this.ccm.helper.html(this.html.coinSVG));
             this.view = document.createElement("div");
             this.view.id = "view";
             this.element.appendChild(this.view);
@@ -448,8 +449,18 @@ ccm.files['ccm.todo.js'] = {
                 taskDeadline: taskDeadline
             });
             //remove icons if not needed
-            if(!task.points)  {taskel.querySelector(".taskPoints").remove();}
-            if(!task.deadline) {taskel.querySelector(".taskDeadline").remove();}
+            if(!task.points)  {
+                taskel.querySelector(".taskPoints").remove();
+            } else {    //insert trophy Svg
+                const trophy = this.ccm.helper.html(this.html.trophySVG);
+                taskel.querySelector(".trophyIcon").appendChild(trophy);
+            }
+            if(!task.deadline) {
+                taskel.querySelector(".taskDeadline").remove();
+            } else {    //insert calender svg
+                const calendar = this.ccm.helper.html(this.html.calendarSVG);
+                taskel.querySelector(".calendarIcon").appendChild(calendar);
+            }
 
             taskel.setAttribute("id", task.key);
             //deleteTask Button

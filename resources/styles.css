@@ -41,11 +41,20 @@ header {
         gap: 10px;
 
 
-        & #pointsDisplay {
+        & #pointsDisplayWrapper {
             background-color: #FFFBEB;
             border: 2px solid #fff0ab;
             border-radius: 12px;
             padding: 10px;
+
+            display:flex;
+            gap: 2px;
+            align-items: center;
+
+            & #coinSVG {
+                color: var(--orange);
+            }
+
         }
         & #logout {
             padding: 5px;
@@ -436,6 +445,12 @@ input:focus {
                 align-items: center;
                 gap:10px;
                 margin-top:5px;
+
+                p {
+                    display: flex;
+                    gap:5px;
+                    align-items: center;
+                }
 
                 & .taskPoints {
                     color: var(--orange);
