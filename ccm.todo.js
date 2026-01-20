@@ -312,11 +312,18 @@ ccm.files['ccm.todo.js'] = {
         };
         
         /**
-         * shows all categories
+         * shows all categories which userId owns or is a member of
          * @returns {Promise<void>}
          */
         this.showCategories = async() => {
-            const cats = await this.cat.get({ownerId: this.user.getUsername()});
+            const userId = this.user.getUsername();
+            const cats = await this.cat.get({
+                $or: [
+                    {ownerId: userId},
+                    {members: userId}
+                ]
+            });
+            console.log(cats);
             for (const cat of cats) {
                 await this.insertCategory(cat);
             }
