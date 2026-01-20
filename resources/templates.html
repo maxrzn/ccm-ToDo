@@ -147,7 +147,7 @@
 </ccm-template>
 
 <ccm-template key="editMember">
-    <div id="overlay" class="">
+    <div id="overlay" class="hidden">
         <div id="popupEditMember">
             <div class="top-row">
                 <p>Mitglieder verwalten</p>
@@ -157,22 +157,11 @@
                 <span>Mitglied hinzufügen</span>
                 <div class="input-wrapper">
                     <input type="text" class="searchMember" placeholder="Benutzername">
-                    <button class="primary addMemberButton">
-
-                    </button>
+                    <button class="primary addMemberButton"></button>
                 </div>
             </div>
             <p>Aktuelle Mitglieder</p>
-            <div id="memberList">
-                <div class="member">
-                    <div class="memberInfo">
-                        <p class="memberIcon"> %firstLetter% </p>
-                        <p class="memberName">%userId%</p>
-                        <p class="tag">Eigentümer</p>
-                    </div>
-                    <div class="deleteMember"></div>
-                </div>
-            </div>
+            <div id="memberList"></div>
         </div>
     </div>
 </ccm-template>
@@ -182,9 +171,8 @@
         <div class="memberInfo">
             <p class="memberIcon"> %firstLetter% </p>
             <p class="memberName">%userId%</p>
-            <p class="tag">Eigentümer</p>
         </div>
-        <div class="deleteMember">x</div>
+        <div class="deleteMember"></div>
     </div>
 </ccm-template>
 

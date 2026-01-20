@@ -93,7 +93,6 @@ ccm.files['ccm.todo.js'] = {
                 const popupEl = this.element.querySelector("#popupEditMember");
                 popupEl.querySelector(".addMemberButton").appendChild(this.ccm.helper.html(this.html.addMemberSVG));
                 popupEl.querySelector("#closePopup").appendChild(this.ccm.helper.html(this.html.xSVG));
-                popupEl.querySelector(".deleteMember").appendChild(this.ccm.helper.html(this.html.xSVG));
 
                 this.view.appendChild(this.ccm.helper.html(this.html.main));
                 await this.initTasks();
@@ -197,6 +196,39 @@ ccm.files['ccm.todo.js'] = {
                 newTaskButton.disabled = false;
                 this.clearInputs();
             });
+            //close member popup
+            this.element.querySelector("#closePopup").addEventListener("click", () => {
+                this.element.querySelector("#overlay").classList.toggle("hidden", true);
+                this.element.querySelector(".searchMember").value = "";
+            });
+            //add memberButton
+            this.element.querySelector(".addMemberButton").addEventListener("click", async() => {
+                const InputEl = this.element.querySelector(".searchMember");
+                const member = InputEl.value;
+                const categoryId = this.element.querySelector("#categoryList .selected").id;
+                const cat = await this.cat.get(categoryId);
+
+                const exists = await this.userInfo.get({userId: member}); //search for user
+                console.log(cat.members);
+                if(exists.length === 0) {    //user not found
+                    InputEl.focus();
+                    InputEl.value = "";
+                    return alert("Benutzer nicht gefunden");
+                } else if(cat.members.some(m => m === member) || member === cat.ownerId) { //user is already member
+                    InputEl.focus();
+                    InputEl.value = "";
+                    return alert("Benutzer ist bereits Mitglied der Kategorie");
+                }
+                //add member
+                const updatedMembers = [...cat.members, member];
+                await this.cat.set({key: categoryId, members: updatedMembers});
+                this.insertMember(cat.ownerId, member);
+                InputEl.value = "";
+            })
+            //add enter eventlistener
+            this.element.querySelector(".searchMember").addEventListener("keypress", (e) => {
+                if (e.key === "Enter") this.element.querySelector(".addMemberButton").click();
+            });
 
             //clear history Button
             const clearHistoryButton = this.element.querySelector("#clearHistoryButton");
@@ -271,7 +303,7 @@ ccm.files['ccm.todo.js'] = {
                 };
                 this.reward.set(rewardData);
                 this.resetNewRewardBox();
-                this.insertOpenReward(rewardData);
+                await this.insertOpenReward(rewardData);
             });
 
             //show all rewards
@@ -308,6 +340,7 @@ ccm.files['ccm.todo.js'] = {
                     const categoryEl = e.target.closest("div[id]");
                     this.element.querySelector("#overlay").classList.toggle("hidden", false);
                     console.log(categoryEl.id);
+                    await this.showMembers(await this.cat.get(categoryEl.id));
                 })
                 //delete Category listener
                 newCat.querySelector(".delete").addEventListener("click", async(e) => {
@@ -338,6 +371,44 @@ ccm.files['ccm.todo.js'] = {
             this.element.querySelector("#newTaskButton").disabled = false; //enable button
             this.highlightCategory(target);
             await this.showTasks(target.id);
+        }
+
+        this.showMembers = async(cat) => {
+            this.element.querySelector("#memberList").innerHTML = "";
+            //insert self
+            this.insertMember(cat.ownerId, this.user.getUsername());
+            console.log(cat);
+            //insert members
+            if(cat.members.length > 0) {
+                cat.members.forEach((username) => {this.insertMember(cat.ownerId, username);});
+            }
+        }
+        this.insertMember = (ownerId, username) => {
+            const memberList = this.element.querySelector("#memberList");
+            const memberEl = this.ccm.helper.html(this.html.member, {userId: username, firstLetter: username[0].toUpperCase()});
+
+            //append svgs (workaround)
+            memberEl.querySelector(".deleteMember").appendChild(this.ccm.helper.html(this.html.xSVG));
+
+            //customize member element if inserted member is the owner
+            if(ownerId === username) {
+                memberEl.querySelector(".deleteMember").classList.add("hidden");
+                const tag = document.createElement("p");
+                tag.classList.add("tag");
+                tag.textContent = "Eigentümer";
+                memberEl.querySelector(".memberInfo").appendChild(tag);
+            } else {
+                memberEl.querySelector(".deleteMember").addEventListener("click", async(e) => {
+                    const catKey = this.element.querySelector("#categoryList .selected").id;
+                    const memberEl = e.target.closest(".member");
+                    const memberName = memberEl.querySelector(".memberName").textContent;
+                    const cat = await this.cat.get(catKey);
+                    const updatedMembers = cat.members.filter(member => member !== memberName);
+                    await this.cat.set({key: catKey, members: updatedMembers});
+                    memberEl.remove();
+                });
+            }
+            memberList.appendChild(memberEl);
         }
 
         /**
