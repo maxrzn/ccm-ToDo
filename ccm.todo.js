@@ -101,9 +101,25 @@ ccm.files['ccm.todo.js'] = {
                     return;
                 }
                 //new Task(Task data)
+                const catList = this.element.querySelector("#categoryList");
+                const myCats = [...catList.querySelectorAll(".category:not(.default)")]; //spread op to convert nodelist to array
+                const hasCat = myCats.some(cat => { return cat.id === dataset.categoryId;});
+                if(!hasCat) {return;}   //if client doesnt have category do nothing
 
-                //complete Task(task data)
-
+                //client has Category
+                if(dataset.categoryId === catList.querySelector(".selected").id) { //category open
+                    if(dataset.status === "open") { //created Task
+                        await this.insertOpenTask(dataset);
+                        await this.updateTaskCount(dataset.categoryId);
+                    } else {    //complete Task(task data)
+                        const taskEl = this.element.querySelector(`#taskList div[id='${dataset.key}']`);
+                        taskEl.remove();
+                        await this.updateTaskCount(dataset.categoryId);
+                        await this.insertCompletedTask(dataset);
+                    }
+                } else {    //category closed
+                    await this.updateTaskCount(dataset.categoryId);
+                }
             }
             /*let data;
 
@@ -533,6 +549,7 @@ ccm.files['ccm.todo.js'] = {
          * @param task task object
          */
         this.insertOpenTask = (task) => {
+            //TODO insert userIcon
             const taskList = this.element.querySelector("#taskList");
             const taskDeadline = task.deadline ? new Date(task.deadline).toLocaleDateString("De-de") : "";
             const taskel = this.ccm.helper.html(this.html.task, {
@@ -567,7 +584,6 @@ ccm.files['ccm.todo.js'] = {
             });
             //completeTask Button
             taskel.querySelector(".completeTaskButton").addEventListener("click", async (e) => {
-                const taskHistory = this.element.querySelector("#taskHistory");
                 const taskDiv = e.target.closest("div[id]");
                 taskDiv.remove();
                 const taskKey = taskDiv.getAttribute("id");
@@ -588,6 +604,7 @@ ccm.files['ccm.todo.js'] = {
          * @param task task object
          */
         this.insertCompletedTask = (task) => {
+            //TODO insert icon from user that completed it
             const taskHistory = this.element.querySelector("#taskHistory");
             taskHistory.classList.toggle("hidden", false);
             const points = task.points ? "+" + task.points + " Punkte" : "";
@@ -724,6 +741,7 @@ ccm.files['ccm.todo.js'] = {
             history.classList.toggle("hidden", t.length === 0);
         }
         this.updateTaskCount = async (catId) => {
+            //TODO make TaskCount flash
             const tasks = await this.task.get({categoryId: catId, status:"open"});
             const taskCount = tasks.length;
             const catDiv = this.element.querySelector(`[id="${catId}"]`);
