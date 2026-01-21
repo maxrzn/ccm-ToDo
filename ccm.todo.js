@@ -84,7 +84,26 @@ ccm.files['ccm.todo.js'] = {
 
             //listen on task dataset
             this.task.onchange = async(dataset) => {
-                //TODO
+                console.log(dataset);
+                //delete Task(task key)
+                if(typeof dataset === "string") {
+                    const taskOpen = this.element.querySelector(`#taskList div[id='${dataset}']`);
+                    if(taskOpen) {
+                        const cat = this.element.querySelector('#categoryList .selected');
+                        taskOpen.remove();
+                        await this.updateTaskCount(cat.id);
+                    }
+                    const taskClosed = this.element.querySelector(`#taskHistory div[id='${dataset}']`);
+                    if(taskClosed) {
+                        console.log(taskClosed);
+                        taskClosed.remove();
+                    }
+                    return;
+                }
+                //new Task(Task data)
+
+                //complete Task(task data)
+
             }
             /*let data;
 
@@ -705,10 +724,10 @@ ccm.files['ccm.todo.js'] = {
             history.classList.toggle("hidden", t.length === 0);
         }
         this.updateTaskCount = async (catId) => {
-            const cat = await this.cat.get(catId);
             const tasks = await this.task.get({categoryId: catId, status:"open"});
             const taskCount = tasks.length;
-            const catDiv = this.element.querySelector(`[id="${cat.key}"]`);
+            const catDiv = this.element.querySelector(`[id="${catId}"]`);
+            console.log("catId" + catId + "catDiv" + catDiv);
             catDiv.querySelector(".taskCount").innerHTML = taskCount + " Aufgaben";
             console.log("taskcount: " + taskCount);
         }
@@ -784,7 +803,7 @@ ccm.files['ccm.todo.js'] = {
             await this.deleteTasks(categoryId, "");
         }
         this.deleteTasks = async(categoryId, status) => {
-            const query = {ownerId:this.user.getUsername(), categoryId:categoryId};
+            const query = {categoryId:categoryId};
             if(status !== "") {query.status = status;}
             const tasks = await this.task.get(query);
             console.log("tasks" + tasks);
