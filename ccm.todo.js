@@ -580,7 +580,6 @@ ccm.files['ccm.todo.js'] = {
                 await this.task.del(taskDiv.getAttribute("id"));
                 this.updateNoTaskInfo();
                 await this.updateTaskCount(categoryId);
-                //TODO trigger tasklist refresh for other participants if needed
             });
             //completeTask Button
             taskel.querySelector(".completeTaskButton").addEventListener("click", async (e) => {
@@ -594,7 +593,6 @@ ccm.files['ccm.todo.js'] = {
                 this.updateNoTaskInfo();
                 this.updateHistoryVisibility();
                 await this.updateTaskCount(task.categoryId);
-                //TODO trigger tasklist refresh for other participants if needed
             })
             taskList.prepend(taskel);
             this.updateNoTaskInfo();
@@ -702,7 +700,6 @@ ccm.files['ccm.todo.js'] = {
          * @returns {Promise<void>}
          */
         this.updatePoints = async(points) => {
-            console.log(points);
             const entry = (await this.userInfo.get({userId: this.user.getUsername()}))[0];
             if(points>0) {
                 await this.userInfo.set({
@@ -710,7 +707,6 @@ ccm.files['ccm.todo.js'] = {
                     earnedPoints: entry.earnedPoints + points
                 });
             } else {
-                console.log("negative");
                 await this.userInfo.set({
                     key: entry.key,
                     spentPoints: entry.spentPoints - points
@@ -779,7 +775,6 @@ ccm.files['ccm.todo.js'] = {
         }
         this.updateBalanceDisplay = async() => {
             const balance = await this.getBalance(this.user.getUsername());
-            console.log(balance);
             this.element.querySelector("#pointsDisplay").innerHTML = balance + " Punkte";
             await this.updateRewardButtons();
         }
@@ -834,6 +829,16 @@ ccm.files['ccm.todo.js'] = {
                 t.forEach((t) => t.remove());
                 this.updateHistoryVisibility();
             }
+        }
+        this.getMyTaskCount = async(status, catId) => {
+            let tasks;
+            if(catId) {
+                tasks = await this.task.get({userId:this.user.getUsername(), categoryId:catId});
+            } else {
+                tasks = await this.task.get({userId:this.user.getUsername()});
+            }
+            const query  = tasks.filter((t) => t.status === status);
+            return query.length;
         }
 
     },
