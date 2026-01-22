@@ -582,8 +582,10 @@ ccm.files['ccm.todo.js'] = {
                 await this.updateTaskCount(categoryId);
             });
             //completeTask Button
+
             taskel.querySelector(".completeTaskButton").addEventListener("click", async (e) => {
                 const taskDiv = e.target.closest("div[id]");
+                //TODO animation und sound einfügen
                 taskDiv.remove();
                 const taskKey = taskDiv.getAttribute("id");
                 this.task.set({key : taskKey, status : 'closed' });
