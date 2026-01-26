@@ -7,6 +7,7 @@
     --green_hover: #00b849;
 
     background-color: #efefef;
+
 }
 #element:hover {
     cursor: default;
@@ -717,6 +718,44 @@ menu {
         gap: 10px;
     }
 }
+
+
+#stats {
+    padding: 20px;
+    & .field{
+        border: 1px lightgray solid;
+        border-radius: 12px;
+        box-shadow: 0 0 5px #b8b8b8;
+        background-color: white;
+        padding: 20px;
+    }
+    & #stats-row {
+        display:flex;
+        justify-content:space-around;
+        margin-bottom: 20px;
+
+        & .value {
+            font-size: 25px;
+            margin-top: 5px;
+            text-align: center;
+        }
+        & #field1 .value{
+            color:green;
+        }
+        & #field2 .value{
+            color:blue;
+        }
+        & #field3 .value{
+            color:red;
+        }
+    }
+
+    #highchart-4-0-0-1 > #element {
+        background-color: white;
+    }
+
+}
+
 svg {
     width:100%;
     height:100%;
