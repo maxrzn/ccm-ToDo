@@ -161,7 +161,7 @@ ccm.files['ccm.todo.js'] = {
             //tasks view eventlistener
             this.element.querySelector("#leftArrow").addEventListener("click",() => {this.switchView("tasks")});
 
-            await this.switchView("shopStats");
+            await this.switchView("tasks");
 
         }
 
@@ -332,7 +332,7 @@ ccm.files['ccm.todo.js'] = {
             this.element.querySelector("#statsView").addEventListener("click", () => this.switchView2("stats"));
 
             //open shop view (default)
-            await this.switchView2("stats");
+            await this.switchView2("shop");
         }
         this.switchView2 = async (view) => {
             const state = view === "stats";
