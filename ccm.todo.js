@@ -350,9 +350,8 @@ ccm.files['ccm.todo.js'] = {
             //calculate Values
             let settings;
             const userId = this.user.getUsername();
-            const myTasks = await this.task.get({userId:userId});
-            const completedTasks = myTasks.filter(t => t.status === "closed").length;
-            const openTasks = myTasks.filter(t => t.status === "open").length;
+            const completedTasks = (await this.task.get({completed_by:userId})).length;
+            const openTasks = (await this.task.get({userId:userId, status:"open"})).length;
             const points = (await this.userInfo.get({userId:userId}))[0].earnedPoints;
 
             if(categoryId) {
