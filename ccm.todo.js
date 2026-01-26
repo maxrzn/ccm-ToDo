@@ -378,8 +378,6 @@ ccm.files['ccm.todo.js'] = {
 
                         title: { text: "Kategorie: " + cat.title },
 
-
-
                         xAxis: {
                             categories: data.map(d => d.name)
                         },
