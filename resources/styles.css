@@ -482,8 +482,13 @@ input:focus {
 
                 & .icon-box-checkmark {
                     background-color: var(--green);
+                    transition: transform 120ms ease, opacity 120ms ease;
                     &:hover {
                         background-color: var(--green_hover);
+                    }
+                    &.active {
+                        transform: scale(1.2);
+                        opacity: 0.8;
                     }
                 }
 

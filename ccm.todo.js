@@ -699,16 +699,24 @@ ccm.files['ccm.todo.js'] = {
 
             taskel.querySelector(".completeTaskButton").addEventListener("click", async (e) => {
                 const taskDiv = e.target.closest("div[id]");
-                //TODO animation und sound einfügen
-                taskDiv.remove();
-                const taskKey = taskDiv.getAttribute("id");
-                this.task.set({key : taskKey, status : 'closed', completed_by: this.user.getUsername()});
-                const task = await this.task.get(taskKey);
-                await this.updatePoints(Number(task.points));
-                this.insertCompletedTask(task);
-                this.updateNoTaskInfo();
-                this.updateHistoryVisibility();
-                await this.updateTaskCount(task.categoryId);
+                const button = taskDiv.querySelector(".completeTaskButton");
+                //TODO add rest of animation
+                await new Audio("resources/sounds/complete.mp3").play();
+                button.classList.add("active");
+                setTimeout(async() => {
+                    button.classList.remove("active")
+                    taskDiv.remove();
+
+                    const taskKey = taskDiv.getAttribute("id");
+                    this.task.set({key : taskKey, status : 'closed', completed_by: this.user.getUsername()});
+                    const task = await this.task.get(taskKey);
+                    await this.updatePoints(Number(task.points));
+                    this.insertCompletedTask(task);
+                    this.updateNoTaskInfo();
+                    this.updateHistoryVisibility();
+                    await this.updateTaskCount(task.categoryId);
+                }, 500);
+
             })
             taskList.prepend(taskel);
             this.updateNoTaskInfo();
