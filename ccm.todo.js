@@ -178,12 +178,14 @@ ccm.files['ccm.todo.js'] = {
 
                 this.view.appendChild(this.ccm.helper.html(this.html.main));
                 await this.initTasks();
-                this.updateHeader("tasks");
+                this.updateHeader(view);
             } else if(view === "shopStats") {
                 this.view.innerHTML = "";
                 this.view.appendChild(this.ccm.helper.html(this.html.shopStats));
                 await this.initShopStats();
-                this.updateHeader("shopStats");
+                this.updateHeader(view);
+                //open shop view (default)
+                await this.switchView2("shop");
             }
         }
 
@@ -260,7 +262,8 @@ ccm.files['ccm.todo.js'] = {
                     points: this.element.querySelector("#taskPoints").value,
                     status: "open",
                     categoryId: categoryId,
-                    userId: userId
+                    userId: userId,
+                    completed_by: ""
                 });
                 newTaskBox.classList.add("hidden");
                 newTaskButton.disabled = false;
@@ -330,9 +333,6 @@ ccm.files['ccm.todo.js'] = {
             //add navigation listeners
             this.element.querySelector("#shopView").addEventListener("click", () => this.switchView2("shop"));
             this.element.querySelector("#statsView").addEventListener("click", () => this.switchView2("stats"));
-
-            //open shop view (default)
-            await this.switchView2("shop");
         }
         this.switchView2 = async (view) => {
             const state = view === "stats";
@@ -346,39 +346,42 @@ ccm.files['ccm.todo.js'] = {
                 await this.initStats();
             }
         }
-        this.initStats = async() => {
-            const view = this.element.querySelector("#view2");
+        this.initStats = async(categoryId) => {
             //calculate Values
+            let settings;
             const userId = this.user.getUsername();
             const myTasks = await this.task.get({userId:userId});
             const completedTasks = myTasks.filter(t => t.status === "closed").length;
             const openTasks = myTasks.filter(t => t.status === "open").length;
-            const points = myTasks.reduce((sum, t) => sum + Number(t.points),0);
+            const points = (await this.userInfo.get({userId:userId}))[0].earnedPoints;
 
-            const stats = this.ccm.helper.html(this.html.stats, {completedTasks: completedTasks, openTasks: openTasks, earnedPoints: points});
-            view.appendChild(stats);
+            if(categoryId) {
+                this.element.querySelector("#view").innerHTML = "";
+                const view2 = document.createElement("div");
+                view2.id = "view2";
+                this.element.querySelector("#view").appendChild(view2);
+                this.updateHeader("stats");
 
-            let weak = Math.round((completedTasks + openTasks) * 0.5);
-            let strong = Math.round((completedTasks + openTasks) * 0.8);
+                const cat = await this.cat.get(categoryId);
+                const members = [cat.ownerId, ...cat.members];
+                let data = [];
 
-            /*if (weak >= completedTasks) weak = completedTasks - 1;
-            if (strong <= completedTasks) strong = completedTasks + 2;
-            if (weak < 0) weak = 0;*/
-
-            await ccm.start(
-                "https://ccmjs.github.io/akless-components/highchart/versions/ccm.highchart-4.0.0.min.js",
-                {
-                    root: this.element.querySelector("#graph"),
-
-                    settings: {
+                for(const member of members) {
+                    const tasks = await this.task.get({
+                        categoryId: categoryId,
+                        status: "closed",
+                        completed_by: member
+                    });
+                    data.push({name: member, value: tasks.length});
+                    settings = {
                         chart: { type: "column" },
 
-                        title: { text: "Produktivitätsvergleich" },
+                        title: { text: "Kategorie: " + cat.title },
 
-                        subtitle: { text: "Du vs. künstliche Konkurrenz" },
+
 
                         xAxis: {
-                            categories: ["Lässiger Lars", "Du", "Produktiver Peter"]
+                            categories: data.map(d => d.name)
                         },
 
                         yAxis: {
@@ -395,10 +398,53 @@ ccm.files['ccm.todo.js'] = {
 
                         series: [{
                             name: "Erledigte Aufgaben",
-                            data: [weak, completedTasks, strong]
+                            data: data.map(d => d.value)
                         }]
                     }
                 }
+
+
+            } else {
+                let weak = Math.round((completedTasks + openTasks) * 0.5);
+                let strong = Math.round((completedTasks + openTasks) * 0.8);
+
+                settings = {
+                    chart: { type: "column" },
+
+                    title: { text: "Produktivitätsvergleich" },
+
+                    subtitle: { text: "Du vs. künstliche Konkurrenz" },
+
+                    xAxis: {
+                        categories: ["Lässiger Lars", "Du", "Produktiver Peter"]
+                    },
+
+                    yAxis: {
+                        min: 0,
+                        title: { text: "Erledigte Aufgaben" }
+                    },
+
+                    plotOptions: {
+                        column: {
+                            dataLabels: { enabled: true },
+                            borderRadius: 6
+                        }
+                    },
+
+                    series: [{
+                        name: "Erledigte Aufgaben",
+                        data: [weak, completedTasks, strong]
+                    }]
+                }
+            }
+            const view = this.element.querySelector("#view2");
+
+            const stats = this.ccm.helper.html(this.html.stats, {completedTasks: completedTasks, openTasks: openTasks, earnedPoints: points});
+            view.appendChild(stats);
+
+            //start highchart component
+            await ccm.start("https://ccmjs.github.io/akless-components/highchart/versions/ccm.highchart-4.0.0.min.js",
+                {root: this.element.querySelector("#graph"), settings: settings}
             );
 
         }
@@ -494,6 +540,10 @@ ccm.files['ccm.todo.js'] = {
                 /*newCat.classList.add("selected");*/
                 newCat.classList.add("default");
             } else {
+                //stats button listener
+                newCat.querySelector(".stats").addEventListener("click", async(e) => {
+                    await this.initStats(e.target.closest("div[id]").id);
+                })
                 //members button listener
                 newCat.querySelector(".group").addEventListener("click", async(e) => {
                     const categoryEl = e.target.closest("div[id]");
@@ -655,7 +705,7 @@ ccm.files['ccm.todo.js'] = {
                 //TODO animation und sound einfügen
                 taskDiv.remove();
                 const taskKey = taskDiv.getAttribute("id");
-                this.task.set({key : taskKey, status : 'closed' });
+                this.task.set({key : taskKey, status : 'closed', completed_by: this.user.getUsername()});
                 const task = await this.task.get(taskKey);
                 await this.updatePoints(Number(task.points));
                 this.insertCompletedTask(task);
@@ -828,13 +878,14 @@ ccm.files['ccm.todo.js'] = {
 
         this.updateHeader = (view) => {
             this.element.querySelector("#switchViewButton").classList.toggle("hidden", view==="shopStats");
-            this.element.querySelector("#greeting").classList.toggle("hidden", view==="shopStats");
+            this.element.querySelector("#greeting").classList.toggle("hidden", !(view==="tasks"));
             this.element.querySelector("#leftArrow").classList.toggle("hidden", view==="tasks");
             if(view === "tasks") {
                 this.element.querySelector("#viewTitle").textContent = "To-Do Manager";
             } else if(view === "shopStats") {
                 this.element.querySelector("#viewTitle").textContent = "Shop & Statistiken";
-                document.createElement("button")
+            } else if(view === "stats") {
+                this.element.querySelector("#viewTitle").textContent = "Statistiken"
             }
         }
 
