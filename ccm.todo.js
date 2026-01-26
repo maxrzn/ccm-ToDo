@@ -7,6 +7,7 @@ ccm.files['ccm.todo.js'] = {
         user : [
             "ccm.start",
             "https://ccmjs.github.io/akless-components/user/versions/ccm.user-9.7.0.js",
+            /*{css: ["ccm.load", "./resources/styles_user.css"]}*/
         ],
         cat: ['ccm.store', {
             name: "mziege2s_categories",
@@ -110,16 +111,13 @@ ccm.files['ccm.todo.js'] = {
                 if(dataset.categoryId === catList.querySelector(".selected").id) { //category open
                     if(dataset.status === "open") { //created Task
                         await this.insertOpenTask(dataset);
-                        await this.updateTaskCount(dataset.categoryId);
                     } else {    //complete Task(task data)
                         const taskEl = this.element.querySelector(`#taskList div[id='${dataset.key}']`);
                         taskEl.remove();
-                        await this.updateTaskCount(dataset.categoryId);
                         await this.insertCompletedTask(dataset);
                     }
-                } else {    //category closed
-                    await this.updateTaskCount(dataset.categoryId);
                 }
+                await this.updateTaskCount(dataset.categoryId);
             }
             /*let data;
 
@@ -163,7 +161,8 @@ ccm.files['ccm.todo.js'] = {
             //tasks view eventlistener
             this.element.querySelector("#leftArrow").addEventListener("click",() => {this.switchView("tasks")});
 
-            await this.switchView("tasks");
+            await this.switchView("shopStats");
+
         }
 
         this.switchView = async(view) => {
@@ -328,16 +327,84 @@ ccm.files['ccm.todo.js'] = {
             const view2 = document.createElement("div");
             view2.id = "view2";
             this.element.querySelector("#view").appendChild(view2);
-            this.switchView2("shop");
+            //add navigation listeners
+            this.element.querySelector("#shopView").addEventListener("click", () => this.switchView2("shop"));
+            this.element.querySelector("#statsView").addEventListener("click", () => this.switchView2("stats"));
+
+            //open shop view (default)
+            await this.switchView2("stats");
         }
-        this.switchView2 = (view) => {
+        this.switchView2 = async (view) => {
+            const state = view === "stats";
+            this.element.querySelector("#statsView").classList.toggle("selected", state);
+            this.element.querySelector("#shopView").classList.toggle("selected", !state);
+            this.element.querySelector("#view2").innerHTML = "";
+
             if(view === "shop") {
-                this.initShop();
+                await this.initShop();
+            } else if(view === "stats") {
+                await this.initStats();
             }
         }
+        this.initStats = async() => {
+            const view = this.element.querySelector("#view2");
+            //calculate Values
+            const userId = this.user.getUsername();
+            const myTasks = await this.task.get({userId:userId});
+            const completedTasks = myTasks.filter(t => t.status === "closed").length;
+            const openTasks = myTasks.filter(t => t.status === "open").length;
+            const points = myTasks.reduce((sum, t) => sum + Number(t.points),0);
+
+            const stats = this.ccm.helper.html(this.html.stats, {completedTasks: completedTasks, openTasks: openTasks, earnedPoints: points});
+            view.appendChild(stats);
+
+            let weak = Math.round((completedTasks + openTasks) * 0.5);
+            let strong = Math.round((completedTasks + openTasks) * 0.8);
+
+            /*if (weak >= completedTasks) weak = completedTasks - 1;
+            if (strong <= completedTasks) strong = completedTasks + 2;
+            if (weak < 0) weak = 0;*/
+
+            await ccm.start(
+                "https://ccmjs.github.io/akless-components/highchart/versions/ccm.highchart-4.0.0.min.js",
+                {
+                    root: this.element.querySelector("#graph"),
+
+                    settings: {
+                        chart: { type: "column" },
+
+                        title: { text: "Produktivitätsvergleich" },
+
+                        subtitle: { text: "Du vs. künstliche Konkurrenz" },
+
+                        xAxis: {
+                            categories: ["Lässiger Lars", "Du", "Produktiver Peter"]
+                        },
+
+                        yAxis: {
+                            min: 0,
+                            title: { text: "Erledigte Aufgaben" }
+                        },
+
+                        plotOptions: {
+                            column: {
+                                dataLabels: { enabled: true },
+                                borderRadius: 6
+                            }
+                        },
+
+                        series: [{
+                            name: "Erledigte Aufgaben",
+                            data: [weak, completedTasks, strong]
+                        }]
+                    }
+                }
+            );
+
+        }
         this.initShop = async() => {
-            const view2 = this.element.querySelector("#view2");
-            view2.appendChild(this.ccm.helper.html(this.html.shop));
+            const view = this.element.querySelector("#view2");
+            view.appendChild(this.ccm.helper.html(this.html.shop));
             const newRewardBox = this.element.querySelector("#newRewardBox");
             const openRewardCreation = this.element.querySelector("#openRewardCreation");
             //clear reward history
@@ -646,6 +713,7 @@ ccm.files['ccm.todo.js'] = {
                     rewardEl.remove();
                 });
             });
+            //TODO refresh needed to buy newly created reward (fix)
             //buy reward eventlisteners
             const buyRewardsEl = this.element.querySelectorAll(".buyRewardButton");
             buyRewardsEl.forEach((el) => {
@@ -703,6 +771,7 @@ ccm.files['ccm.todo.js'] = {
          */
         this.updatePoints = async(points) => {
             const entry = (await this.userInfo.get({userId: this.user.getUsername()}))[0];
+            console.log(points);
             if(points>0) {
                 await this.userInfo.set({
                     key: entry.key,
