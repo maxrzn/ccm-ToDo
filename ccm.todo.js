@@ -224,8 +224,10 @@ ccm.files['ccm.todo.js'] = {
                     members : []
                 });
                 this.closeNewCatBox();
+                console.log(await this.cat.get(newCat));
                 await this.insertCategory(await this.cat.get(newCat));
-                await this.selectCategory(newCat);
+                const catEl = this.element.querySelector(`#categoryList div[id='${newCat}']`);
+                await this.selectCategory(catEl);
             });
 
             //cancel Category creation
@@ -577,7 +579,7 @@ ccm.files['ccm.todo.js'] = {
         }
 
         this.selectCategory = async(e) => {
-            console.trace("select");
+            console.trace(e);
             let target;
             if(e && e.target) {//called from click event
                 target = e.target.closest(".category");
@@ -946,7 +948,6 @@ ccm.files['ccm.todo.js'] = {
             const query = {categoryId:categoryId};
             if(status !== "") {query.status = status;}
             const tasks = await this.task.get(query);
-            console.log("tasks" + tasks);
             tasks.forEach(element => {
                 this.task.del(element.key);
                 console.log("Task: " + element.key + " wurde ausradiert!");
