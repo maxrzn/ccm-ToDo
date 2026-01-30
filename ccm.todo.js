@@ -2,7 +2,7 @@
 
 ccm.files['ccm.todo.js'] = {
     name: 'todo',
-    ccm: '././libs/ccm/ccm.js',
+    ccm: 'https://ccmjs.github.io/ccm/versions/ccm-25.5.3.js',
     config: {
         user : [
             "ccm.start",
@@ -132,7 +132,7 @@ ccm.files['ccm.todo.js'] = {
 
             data = await this.reward.get();
             for (const d of data) await this.reward.del(d.key);*/
-
+            console.log(this.user);
             const userExists = await this.userInfo.get({userId:userId}); //check for existing categories
             if(userExists.length === 0) {
                 await this.cat.set({    //create Default category
@@ -224,7 +224,6 @@ ccm.files['ccm.todo.js'] = {
                     members : []
                 });
                 this.closeNewCatBox();
-                console.log(await this.cat.get(newCat));
                 await this.insertCategory(await this.cat.get(newCat));
                 const catEl = this.element.querySelector(`#categoryList div[id='${newCat}']`);
                 await this.selectCategory(catEl);
@@ -496,6 +495,7 @@ ccm.files['ccm.todo.js'] = {
                     status: "open"
                 };
                 this.reward.set(rewardData);
+                console.log(await this.reward.get({ownerId:this.user.getUsername()}))
                 this.resetNewRewardBox();
                 await this.insertOpenReward(rewardData);
             });
@@ -840,6 +840,7 @@ ccm.files['ccm.todo.js'] = {
                     spentPoints: entry.spentPoints - points
                 })
             }
+            console.log(await this.userInfo.get({userId:this.user.getUsername()}))
             await this.updateBalanceDisplay();
         }
 
