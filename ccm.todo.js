@@ -2,7 +2,7 @@
 
 ccm.files['ccm.todo.js'] = {
     name: 'todo',
-    ccm: 'https://ccmjs.github.io/ccm/versions/ccm-25.5.3.js',
+    ccm: '././libs/ccm/ccm.js', //ccmjs Kernskript
     config: {
         user : [
             "ccm.start",
