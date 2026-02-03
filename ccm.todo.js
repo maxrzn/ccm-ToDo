@@ -1,13 +1,12 @@
 'use strict';
 
 ccm.files['ccm.todo.js'] = {
-    name: 'todo',
-    ccm: '././libs/ccm/ccm.js', //ccmjs Kernskript
-    config: {
+    name: 'todo',                   //eindeutiger Name der Komponente
+    ccm: '././libs/ccm/ccm.js',     //ccmjs Kernskript
+    config: {                       //default Konfiguration
         user : [
             "ccm.start",
             "https://ccmjs.github.io/akless-components/user/versions/ccm.user-9.7.0.js",
-            /*{css: ["ccm.load", "./resources/styles_user.css"]}*/
         ],
         cat: ['ccm.store', {
             name: "mziege2s_categories",
@@ -35,103 +34,14 @@ ccm.files['ccm.todo.js'] = {
         }
 
         this.start = async()=> {
-            console.log("start");
             await this.user.login();
             const userId = this.user.getUsername();
 
-            //listen on cat dataset
-            this.cat.onchange = async(dataset) => {
-                console.log(dataset);
-                const list = this.element.querySelector("#categoryList");
-                //DELETE
-                if(typeof dataset === "string") {   //delete event returns key as string
-                    const catEl = this.element.querySelector(`#categoryList [id="${dataset}"]`);
-                    if(catEl) {
-                        catEl.remove();
-                    } else {return;}
-                    if(catEl.classList.contains("selected")) {  //category was selected
-                        list.firstElementChild.classList.toggle("selected", true)   //select default
-                    }
-                    return;
-                }
-                //check if Change is relevant
-                const isMember = dataset.members.some(m => m === userId);
-                const isOwner = dataset.ownerId === userId;
-                console.log("member: " + isMember + " owner: " + isOwner);
-                const catEl = list.querySelector(`[id="${dataset.key}"]`)
+            //cat onChange callback
+            this.cat.onchange = async(dataset) => {await this.catChangeHandler(dataset)};
+            //task onChange callback
+            this.task.onchange = async(dataset) => {await this.taskChangeHandler(dataset)};
 
-                if(!isMember && !isOwner) { //no member or owner
-                    //remove
-                    if (catEl) {    //category exists in UI  --> remove
-                        if(catEl.classList.contains("selected")) {
-                            await this.selectCategory();
-                        }
-                        catEl.remove();
-                    }
-                    return; //return if no member or owner
-                }
-                //update member list
-                if(catEl) { //category exists
-                    //category group management open
-                    if(!(this.element.querySelector("#overlay").classList.contains("hidden")) && catEl.classList.contains("selected")) {
-                        await this.showMembers(dataset);
-                    }
-                } else {    //newly added
-                    await this.insertCategory(dataset);
-                    await this.updateTaskCount(dataset.key);
-                    list.querySelector(".selected").click();    //reselect category
-                }
-            };
-
-            //listen on task dataset
-            this.task.onchange = async(dataset) => {
-                console.log(dataset);
-                //delete Task(task key)
-                if(typeof dataset === "string") {
-                    const taskOpen = this.element.querySelector(`#taskList div[id='${dataset}']`);
-                    if(taskOpen) {
-                        const cat = this.element.querySelector('#categoryList .selected');
-                        taskOpen.remove();
-                        await this.updateTaskCount(cat.id);
-                    }
-                    const taskClosed = this.element.querySelector(`#taskHistory div[id='${dataset}']`);
-                    if(taskClosed) {
-                        console.log(taskClosed);
-                        taskClosed.remove();
-                    }
-                    return;
-                }
-                //new Task(Task data)
-                const catList = this.element.querySelector("#categoryList");
-                const myCats = [...catList.querySelectorAll(".category:not(.default)")]; //spread op to convert nodelist to array
-                const hasCat = myCats.some(cat => { return cat.id === dataset.categoryId;});
-                if(!hasCat) {return;}   //if client doesnt have category do nothing
-
-                //client has Category
-                if(dataset.categoryId === catList.querySelector(".selected").id) { //category open
-                    if(dataset.status === "open") { //created Task
-                        await this.insertOpenTask(dataset);
-                    } else {    //complete Task(task data)
-                        const taskEl = this.element.querySelector(`#taskList div[id='${dataset.key}']`);
-                        taskEl.remove();
-                        await this.insertCompletedTask(dataset);
-                    }
-                }
-                await this.updateTaskCount(dataset.categoryId);
-            }
-            /*let data;
-
-            data = await this.cat.get();
-            for (const d of data) await this.cat.del(d.key);
-
-            data = await this.task.get();
-            for (const d of data) await this.task.del(d.key);
-
-            data = await this.userInfo.get();
-            for (const d of data) await this.userInfo.del(d.key);
-
-            data = await this.reward.get();
-            for (const d of data) await this.reward.del(d.key);*/
             console.log(this.user);
             const userExists = await this.userInfo.get({userId:userId}); //check for existing categories
             if(userExists.length === 0) {
@@ -162,7 +72,86 @@ ccm.files['ccm.todo.js'] = {
             this.element.querySelector("#leftArrow").addEventListener("click",() => {this.switchView("tasks")});
 
             await this.switchView("tasks");
+        }
 
+        this.catChangeHandler = async(dataset) => {
+            const userId = this.user.getUsername();
+            console.log(dataset);
+            const list = this.element.querySelector("#categoryList");
+            //DELETE
+            if(typeof dataset === "string") {   //delete event returns key as string
+                const catEl = this.element.querySelector(`#categoryList [id="${dataset}"]`);
+                if(catEl) {
+                    catEl.remove();
+                } else {return;}
+                if(catEl.classList.contains("selected")) {  //category was selected
+                    list.firstElementChild.classList.toggle("selected", true)   //select default
+                }
+                return;
+            }
+            //check if Change is relevant
+            const isMember = dataset.members.some(m => m === userId);
+            const isOwner = dataset.ownerId === userId;
+            console.log("member: " + isMember + " owner: " + isOwner);
+            const catEl = list.querySelector(`[id="${dataset.key}"]`)
+
+            if(!isMember && !isOwner) { //no member or owner
+                //remove
+                if (catEl) {    //category exists in UI  --> remove
+                    if(catEl.classList.contains("selected")) {
+                        await this.selectCategory();
+                    }
+                    catEl.remove();
+                }
+                return; //return if no member or owner
+            }
+            //update member list
+            if(catEl) { //category exists
+                //category group management open
+                if(!(this.element.querySelector("#overlay").classList.contains("hidden")) && catEl.classList.contains("selected")) {
+                    await this.showMembers(dataset);
+                }
+            } else {    //newly added
+                await this.insertCategory(dataset);
+                await this.updateTaskCount(dataset.key);
+                list.querySelector(".selected").click();    //reselect category
+            }
+        }
+
+        this.taskChangeHandler = async(dataset) => {
+            console.log(dataset);
+            //delete Task(task key)
+            if(typeof dataset === "string") {
+                const taskOpen = this.element.querySelector(`#taskList div[id='${dataset}']`);
+                if(taskOpen) {
+                    const cat = this.element.querySelector('#categoryList .selected');
+                    taskOpen.remove();
+                    await this.updateTaskCount(cat.id);
+                }
+                const taskClosed = this.element.querySelector(`#taskHistory div[id='${dataset}']`);
+                if(taskClosed) {
+                    console.log(taskClosed);
+                    taskClosed.remove();
+                }
+                return;
+            }
+            //new Task(Task data)
+            const catList = this.element.querySelector("#categoryList");
+            const myCats = [...catList.querySelectorAll(".category:not(.default)")]; //spread op to convert nodelist to array
+            const hasCat = myCats.some(cat => { return cat.id === dataset.categoryId;});
+            if(!hasCat) {return;}   //if client doesnt have category do nothing
+
+            //client has Category
+            if(dataset.categoryId === catList.querySelector(".selected").id) { //category open
+                if(dataset.status === "open") { //created Task
+                    await this.insertOpenTask(dataset);
+                } else {    //complete Task(task data)
+                    const taskEl = this.element.querySelector(`#taskList div[id='${dataset.key}']`);
+                    taskEl.remove();
+                    await this.insertCompletedTask(dataset);
+                }
+            }
+            await this.updateTaskCount(dataset.categoryId);
         }
 
         this.switchView = async(view) => {
@@ -439,11 +428,12 @@ ccm.files['ccm.todo.js'] = {
 
             const stats = this.ccm.helper.html(this.html.stats, {completedTasks: completedTasks, openTasks: openTasks, earnedPoints: points});
             view.appendChild(stats);
+            const url = "https://ccmjs.github.io/akless-components/highchart/versions/ccm.highchart-4.0.0.min.js";
 
-            //start highchart component
-            await ccm.start("https://ccmjs.github.io/akless-components/highchart/versions/ccm.highchart-4.0.0.min.js",
-                {root: this.element.querySelector("#graph"), settings: settings}
-            );
+            await ccm.start(url, {
+                root: this.element.querySelector("#graph"),
+                settings: settings
+            });
 
         }
         this.initShop = async() => {
@@ -972,6 +962,4 @@ ccm.files['ccm.todo.js'] = {
 
     },
 }
-
-//TODO grid layout for main areas, category height indepenent from task window height
 
