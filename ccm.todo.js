@@ -155,7 +155,6 @@ ccm.files['ccm.todo.js'] = {
         }
 
         this.switchView = async(view) => {
-            console.log("switch view");
             if(view === "tasks") {
                 this.view.innerHTML = "";
                 this.view.appendChild(this.ccm.helper.html(this.html.editMember, {userId: this.user.getUsername(), firstLetter: this.user.getUsername().charAt(0).toUpperCase()}))
@@ -340,11 +339,17 @@ ccm.files['ccm.todo.js'] = {
             //calculate Values
             let settings;
             const userId = this.user.getUsername();
-            const completedTasks = (await this.task.get({completed_by:userId})).length;
-            const openTasks = (await this.task.get({userId:userId, status:"open"})).length;
-            const points = (await this.userInfo.get({userId:userId}))[0].earnedPoints;
+            let completedTasks = (await this.task.get({completed_by:userId})).length;
+            let openTasks = (await this.task.get({userId:userId, status:"open"})).length;
+            let points = (await this.userInfo.get({userId:userId}))[0].earnedPoints;
 
             if(categoryId) {
+                const myCompletedTasks = (await this.task.get({categoryId: categoryId, completed_by:userId}));
+
+                completedTasks = myCompletedTasks.length;
+                openTasks = (await this.task.get({categoryId: categoryId, userId:userId, status:"open"})).length;
+                points = myCompletedTasks.map((t)=> Number(t.points)).reduce((sum, val) => sum + val);
+
                 this.element.querySelector("#view").innerHTML = "";
                 const view2 = document.createElement("div");
                 view2.id = "view2";
@@ -522,7 +527,11 @@ ccm.files['ccm.todo.js'] = {
          */
         this.insertCategory = async(cat) => {
             const taskCount = (await this.task.get({categoryId : cat.key, status:"open"})).length;
-            const newCat = this.ccm.helper.html(this.html.category, {categoryKey:cat.key ,title:cat.title, taskCount:taskCount });
+            const newCat = this.ccm.helper.html(this.html.category, {
+                categoryKey:cat.key,
+                title:cat.title,
+                taskCount:taskCount
+            });
             if(cat.title === "Meine Aufgaben") {
                 newCat.querySelector(".catStandard").classList.remove("hidden");
                 newCat.querySelector(".catButtons").remove();
