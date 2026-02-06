@@ -154,6 +154,11 @@ ccm.files['ccm.todo.js'] = {
             await this.updateTaskCount(dataset.categoryId);
         }
 
+        /**
+         * clears View & adds main Elements to View
+         * @param view
+         * @returns {Promise<void>}
+         */
         this.switchView = async(view) => {
             if(view === "tasks") {
                 this.view.innerHTML = "";
@@ -178,7 +183,7 @@ ccm.files['ccm.todo.js'] = {
         }
 
         /**
-         * renders tasks view
+         * initializes tasks view
          * @returns {Promise<void>}
          */
         this.initTasks = async() =>{
@@ -312,7 +317,7 @@ ccm.files['ccm.todo.js'] = {
             });
         }
         /**
-         * initializes shop & statistics site view
+         * initializes shop & statistics view
          * @returns {Promise<void>}
          */
         this.initShopStats = async() => {
@@ -323,6 +328,7 @@ ccm.files['ccm.todo.js'] = {
             this.element.querySelector("#shopView").addEventListener("click", () => this.switchView2("shop"));
             this.element.querySelector("#statsView").addEventListener("click", () => this.switchView2("stats"));
         }
+
         this.switchView2 = async (view) => {
             const state = view === "stats";
             this.element.querySelector("#statsView").classList.toggle("selected", state);
@@ -490,7 +496,6 @@ ccm.files['ccm.todo.js'] = {
                     status: "open"
                 };
                 this.reward.set(rewardData);
-                console.log(await this.reward.get({ownerId:this.user.getUsername()}))
                 this.resetNewRewardBox();
                 await this.insertOpenReward(rewardData);
             });
@@ -904,8 +909,11 @@ ccm.files['ccm.todo.js'] = {
         }
         this.updateBalanceDisplay = async() => {
             const balance = await this.getBalance(this.user.getUsername());
-            this.element.querySelector("#pointsDisplay").innerHTML = balance + " Punkte";
+            const displayEl = this.element.querySelector("#pointsDisplayWrapper");
+            displayEl.querySelector("#pointsDisplay").innerHTML = balance + " Punkte";
             await this.updateRewardButtons();
+            displayEl.classList.add("flash");
+            setTimeout(() => displayEl.classList.remove("flash"), 1000);
         }
         this.updateRewardButtons = async() => {
             const rewardButtons = this.element.querySelectorAll(".buyRewardButton");
