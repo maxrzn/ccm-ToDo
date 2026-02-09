@@ -351,10 +351,10 @@ ccm.files['ccm.todo.js'] = {
 
             if(categoryId) {
                 const myCompletedTasks = (await this.task.get({categoryId: categoryId, completed_by:userId}));
-
+                console.log(myCompletedTasks);
                 completedTasks = myCompletedTasks.length;
                 openTasks = (await this.task.get({categoryId: categoryId, userId:userId, status:"open"})).length;
-                points = myCompletedTasks.map((t)=> Number(t.points)).reduce((sum, val) => sum + val);
+                points = completedTasks > 0 ? myCompletedTasks.map((t)=> Number(t.points)).reduce((sum, val) => sum + val) : 0;
 
                 this.element.querySelector("#view").innerHTML = "";
                 const view2 = document.createElement("div");
@@ -384,6 +384,7 @@ ccm.files['ccm.todo.js'] = {
 
                         yAxis: {
                             min: 0,
+                            allowDecimals: false,
                             title: { text: "Erledigte Aufgaben" }
                         },
 
@@ -419,6 +420,7 @@ ccm.files['ccm.todo.js'] = {
 
                     yAxis: {
                         min: 0,
+                        allowDecimals: false,
                         title: { text: "Erledigte Aufgaben" }
                     },
 
