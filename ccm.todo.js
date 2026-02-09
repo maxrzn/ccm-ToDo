@@ -307,6 +307,7 @@ ccm.files['ccm.todo.js'] = {
                 //add member
                 const updatedMembers = [...cat.members, member];
                 await this.cat.set({key: categoryId, members: updatedMembers});
+
                 this.insertMember(cat.ownerId, member);
                 InputEl.value = "";
             })
@@ -494,10 +495,10 @@ ccm.files['ccm.todo.js'] = {
                     ownerId: this.user.getUsername(),
                     status: "open"
                 };
-                this.reward.set(rewardData);
+                const rewardKey = await this.reward.set(rewardData);
                 console.log(await this.reward.get({ownerId:this.user.getUsername()}))
                 this.resetNewRewardBox();
-                await this.insertOpenReward(rewardData);
+                await this.insertOpenReward((await this.reward.get(rewardKey)));
             });
 
             //show all rewards
@@ -717,7 +718,7 @@ ccm.files['ccm.todo.js'] = {
                     this.updateNoTaskInfo();
                     this.updateHistoryVisibility();
                     await this.updateTaskCount(task.categoryId);
-                }, 500);
+                }, 300);
 
             })
             taskList.prepend(taskel);
@@ -760,7 +761,31 @@ ccm.files['ccm.todo.js'] = {
                 console.log(reward);
                 reward.status === "open" ? this.insertOpenReward(reward) : this.insertClosedReward(reward);
             });
-
+        }
+        this.resetNewRewardBox = () => {
+            const newRewardBox = this.element.querySelector("#newRewardBox");
+            newRewardBox.querySelector(".iconBox.selected").classList.remove("selected");
+            newRewardBox.querySelector("#iconWrapper > span").classList.toggle("selected", true);
+            newRewardBox.querySelector("#rewardNameInput").value = "";
+            newRewardBox.querySelector("#rewardCost").value = 20;
+            this.element.querySelector("#openRewardCreation").disabled = false;
+            newRewardBox.classList.add("hidden");
+        }
+        /**
+         * inserts reward element into RewardList div
+         * @param reward element
+         */
+        this.insertOpenReward = async (reward) => {
+            console.log(reward);
+            const rewardList = this.element.querySelector("#rewardList");
+            const rewardEl = this.ccm.helper.html(this.html.reward, {
+                rewardIcon: reward.icon,
+                rewardTitle: reward.title,
+                rewardCost: reward.cost
+            });
+            rewardEl.id = reward.key;
+            rewardList.prepend(rewardEl);
+            this.updateNoRewardInfo();
             //delete reward eventlisteners
             const rewardsEl = this.element.querySelectorAll(".deleteRewardButton");
             rewardsEl.forEach((el) => {
@@ -783,34 +808,10 @@ ccm.files['ccm.todo.js'] = {
                     await this.updatePoints(Number(-cost));
                 });
             });
-            await this.updateRewardButtons();
-        }
-        this.resetNewRewardBox = () => {
-            const newRewardBox = this.element.querySelector("#newRewardBox");
-            newRewardBox.querySelector(".iconBox.selected").classList.remove("selected");
-            newRewardBox.querySelector("#iconWrapper > span").classList.toggle("selected", true);
-            newRewardBox.querySelector("#rewardNameInput").value = "";
-            newRewardBox.querySelector("#rewardCost").value = 20;
-            this.element.querySelector("#openRewardCreation").disabled = false;
-            newRewardBox.classList.add("hidden");
-        }
-        /**
-         * inserts reward element into RewardList div
-         * @param reward element
-         */
-        this.insertOpenReward = async (reward) => {
-            const rewardList = this.element.querySelector("#rewardList");
-            const rewardEl = this.ccm.helper.html(this.html.reward, {
-                rewardIcon: reward.icon,
-                rewardTitle: reward.title,
-                rewardCost: reward.cost
-            });
-            rewardEl.id = reward.key;
-            rewardList.prepend(rewardEl);
-            this.updateNoRewardInfo();
             await this.updateRewardButtons()
         }
         this.insertClosedReward = (reward) => {
+            console.log(reward);
             const rewardHistoryList = this.element.querySelector("#rewardHistoryList");
             const rewardEl = this.ccm.helper.html(this.html.closedReward, {
                 rewardIcon: reward.icon,
