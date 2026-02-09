@@ -52,6 +52,10 @@ header {
             gap: 2px;
             align-items: center;
 
+            &.flash {
+                animation: flash 1s ease-in-out;
+            }
+
             & #coinSVG {
                 color: var(--orange);
                 width: 15px;
@@ -773,6 +777,22 @@ h1,h3,p {
     display:none !important;
 }
 
+@keyframes flash {
+    0% {
+        background-color: #FFFBEB;
+        box-shadow: 0 0 0 rgba(255, 220, 100, 0);
+    }
+
+    50% {
+        background-color: #fff3c4;
+        box-shadow: 0 0 8px rgba(255, 220, 100, 0.6);
+    }
+
+    100% {
+        background-color: #FFFBEB;
+        box-shadow: 0 0 0 rgba(255, 220, 100, 0);
+    }
+}
 /*
 .icon-btn {
     border: none;
