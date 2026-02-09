@@ -495,9 +495,9 @@ ccm.files['ccm.todo.js'] = {
                     ownerId: this.user.getUsername(),
                     status: "open"
                 };
-                this.reward.set(rewardData);
+                const rewardKey = await this.reward.set(rewardData);
                 this.resetNewRewardBox();
-                await this.insertOpenReward(rewardData);
+                await this.insertOpenReward((await this.reward.get(rewardKey)));
             });
 
             //show all rewards
@@ -721,7 +721,7 @@ ccm.files['ccm.todo.js'] = {
                     this.updateNoTaskInfo();
                     this.updateHistoryVisibility();
                     await this.updateTaskCount(task.categoryId);
-                }, 500);
+                }, 300);
 
             })
             taskList.prepend(taskel);
@@ -764,30 +764,6 @@ ccm.files['ccm.todo.js'] = {
                 console.log(reward);
                 reward.status === "open" ? this.insertOpenReward(reward) : this.insertClosedReward(reward);
             });
-
-            //delete reward eventlisteners
-            const rewardsEl = this.element.querySelectorAll(".deleteRewardButton");
-            rewardsEl.forEach((el) => {
-                el.addEventListener("click", async(e) => {
-                    const rewardEl = e.target.closest(".reward-row");
-                    await this.reward.del(rewardEl.id);
-                    rewardEl.remove();
-                });
-            });
-            //TODO refresh needed to buy newly created reward (fix)
-            //buy reward eventlisteners
-            const buyRewardsEl = this.element.querySelectorAll(".buyRewardButton");
-            buyRewardsEl.forEach((el) => {
-                el.addEventListener("click", async(e) => {
-                    const rewardEl = e.target.closest(".reward-row");
-                    await this.reward.set({key : rewardEl.id, status : 'closed' });
-                    this.insertClosedReward(await this.reward.get(rewardEl.id));
-                    rewardEl.remove();
-                    const cost = rewardEl.querySelector(".rewardCost").textContent;
-                    await this.updatePoints(Number(-cost));
-                });
-            });
-            await this.updateRewardButtons();
         }
         this.resetNewRewardBox = () => {
             const newRewardBox = this.element.querySelector("#newRewardBox");
@@ -810,10 +786,27 @@ ccm.files['ccm.todo.js'] = {
                 rewardCost: reward.cost
             });
             rewardEl.id = reward.key;
-            rewardList.prepend(rewardEl);
-            this.updateNoRewardInfo();
-            await this.updateRewardButtons()
+            console.log(rewardEl.id)
+            //delete reward eventlisteners
+            rewardEl.querySelector(".deleteRewardButton").addEventListener("click", async(e) => {
+                await this.reward.del(rewardEl.id);
+                rewardEl.remove();
+            });
+            //buy reward eventlisteners
+            rewardEl.querySelector(".buyRewardButton").addEventListener("click", async(e) => {
+                await new Audio("resources/sounds/complete.mp3").play();
+                console.log(rewardEl);
+                await this.reward.set({key : rewardEl.id, status : 'closed' });
+                this.insertClosedReward(await this.reward.get(rewardEl.id));
+                rewardEl.remove();
+                const cost = rewardEl.querySelector(".rewardCost").textContent;
+                await this.updatePoints(Number(-cost));
+            });
+        rewardList.prepend(rewardEl);
+        this.updateNoRewardInfo();
+        await this.updateRewardButtons()
         }
+
         this.insertClosedReward = (reward) => {
             const rewardHistoryList = this.element.querySelector("#rewardHistoryList");
             const rewardEl = this.ccm.helper.html(this.html.closedReward, {
