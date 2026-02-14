@@ -259,6 +259,7 @@ ccm.files['ccm.todo.js'] = {
                     userId: userId,
                     completed_by: ""
                 });
+                console.log("Timestamp ausgelöst: " + Date.now());
                 newTaskBox.classList.add("hidden");
                 newTaskButton.disabled = false;
                 this.clearInputs();
@@ -667,7 +668,7 @@ ccm.files['ccm.todo.js'] = {
             this.updateNoTaskInfo();
         }
         /**
-         * inserts completed task into taskList div
+         * inserts open task into taskList div
          * @param task task object
          */
         this.insertOpenTask = (task) => {
@@ -727,6 +728,7 @@ ccm.files['ccm.todo.js'] = {
 
             })
             taskList.prepend(taskel);
+            console.log("Timestamp eingefügt: " + Date.now());
             this.updateNoTaskInfo();
         }
         /**
